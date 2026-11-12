@@ -1,0 +1,351 @@
+{
+  "schema": "pci-equipment-research-1",
+  "retrieved_at": "2026-11-04",
+  "equipment": [
+    {
+      "id": "sensirion-sdp810-125pa",
+      "manufacturer": "Sensirion",
+      "model": "SDP810-125Pa",
+      "name": "Sensirion SDP810-125Pa digital differential pressure sensor",
+      "kind": "differential_pressure_sensor",
+      "verification": "manufacturer_documentation_verified",
+      "physical_unit_verified": false,
+      "source_ids": [
+        "sdp-datasheet"
+      ],
+      "specifications": {
+        "Differential pressure range": "[-125, 125] Pa \u2014 Bidirectional tube-connection variant; p2",
+        "Zero-point accuracy": "0.08 Pa \u2014 p2; includes repeatability; total accuracy is zero-point plus span term; default test 25\u00b0C,3.3V,966mbar",
+        "Span accuracy": "3 % of reading \u2014 p2; added to zero-point term",
+        "Supply voltage": "[2.7, 5.5] V \u2014 p3; use3.3V for project bus",
+        "I2C address": "0x25 7-bit address \u2014 p2/p6; separate same-address devices with mux",
+        "Pressure scale factor": "240 counts/Pa \u2014 p10; signed raw integer divided by scale factor; use returned factor"
+      },
+      "unknowns": [
+        "Serial number and installed sensor orientation",
+        "Actual zero/reference agreement and measurement uncertainty",
+        "Tubing/tap transfer response and physical cable continuity"
+      ],
+      "notes": [
+        "Manufacturer specifications are not a calibration certificate for the team unit.",
+        "Pressure sensor is not itself an airflow meter or vent/fan performance curve."
+      ],
+      "simulation_defaults": {},
+      "checked_at": "2026-11-04",
+      "sources": [
+        {
+          "title": "Sensirion SDP8xx-Digital datasheet",
+          "url": "https://sensirion.com/resource/datasheet/sdp800-d/",
+          "publisher": "Sensirion",
+          "revision": "Version 1.1, April 2019",
+          "retrieved_at": "2026-11-04",
+          "evidence": "Full manufacturer PDF; tables pp2-4, conversion p10"
+        }
+      ]
+    },
+    {
+      "id": "sensirion-sdp810-500pa",
+      "manufacturer": "Sensirion",
+      "model": "SDP810-500Pa",
+      "name": "Sensirion SDP810-500Pa digital differential pressure sensor",
+      "kind": "differential_pressure_sensor",
+      "verification": "manufacturer_documentation_verified",
+      "physical_unit_verified": false,
+      "source_ids": [
+        "sdp-datasheet"
+      ],
+      "specifications": {
+        "Differential pressure range": "[-500, 500] Pa \u2014 Bidirectional tube-connection variant; p2",
+        "Zero-point accuracy": "0.1 Pa \u2014 p2; includes repeatability; total accuracy is zero-point plus span term; default test 25\u00b0C,3.3V,966mbar",
+        "Span accuracy": "3 % of reading \u2014 p2; added to zero-point term",
+        "Supply voltage": "[2.7, 5.5] V \u2014 p3; use3.3V for project bus",
+        "I2C address": "0x25 7-bit address \u2014 p2/p6; separate same-address devices with mux",
+        "Pressure scale factor": "60 counts/Pa \u2014 p10; signed raw integer divided by scale factor; use returned factor"
+      },
+      "unknowns": [
+        "Serial number and installed sensor orientation",
+        "Actual zero/reference agreement and measurement uncertainty",
+        "Tubing/tap transfer response and physical cable continuity"
+      ],
+      "notes": [
+        "Manufacturer specifications are not a calibration certificate for the team unit.",
+        "Pressure sensor is not itself an airflow meter or vent/fan performance curve."
+      ],
+      "simulation_defaults": {},
+      "checked_at": "2026-11-04",
+      "sources": [
+        {
+          "title": "Sensirion SDP8xx-Digital datasheet",
+          "url": "https://sensirion.com/resource/datasheet/sdp800-d/",
+          "publisher": "Sensirion",
+          "revision": "Version 1.1, April 2019",
+          "retrieved_at": "2026-11-04",
+          "evidence": "Full manufacturer PDF; tables pp2-4, conversion p10"
+        }
+      ]
+    },
+    {
+      "id": "adafruit-sht45-5665",
+      "manufacturer": "Adafruit / Sensirion",
+      "model": "5665 / SHT45",
+      "name": "Adafruit Sensirion SHT45 Precision Temperature & Humidity Sensor",
+      "kind": "temperature_humidity_sensor",
+      "verification": "manufacturer_documentation_verified",
+      "physical_unit_verified": false,
+      "source_ids": [
+        "sht45-product",
+        "sht45-pinouts"
+      ],
+      "specifications": {
+        "Typical relative humidity accuracy": "1 %RH \u2014 20\u201370%RH; not a universal bound",
+        "Typical temperature accuracy": "0.1 \u00b0C \u2014 5\u201360\u00b0C",
+        "Breakout supply / logic": "[3.3, 5] V \u2014 Adafruit breakout, not raw chip supply; project uses3.3V",
+        "I2C address": "0x44 7-bit address \u2014 Fixed address"
+      },
+      "unknowns": [
+        "Physical breakout revision and serial/certificate",
+        "Installed placement and environmental response"
+      ],
+      "notes": [
+        "VIN is the selected breakout power input;3V is regulator output.",
+        "Keep heater state recorded; no room airflow diagnosis from this sensor alone."
+      ],
+      "simulation_defaults": {},
+      "checked_at": "2026-11-04",
+      "sources": [
+        {
+          "title": "Adafruit SHT45 product 5665",
+          "url": "https://www.adafruit.com/product/5665",
+          "publisher": "Adafruit",
+          "retrieved_at": "2026-11-04",
+          "evidence": "Product identity and technical details"
+        },
+        {
+          "title": "Adafruit SHT40/SHT41/SHT45 pinouts",
+          "url": "https://learn.adafruit.com/adafruit-sht40-temperature-humidity-sensor/pinouts",
+          "publisher": "Adafruit",
+          "retrieved_at": "2026-11-04",
+          "evidence": "Breakout voltage, I2C address, pins"
+        }
+      ]
+    },
+    {
+      "id": "adafruit-bmp580-6411",
+      "manufacturer": "Adafruit / Bosch Sensortec",
+      "model": "6411 / BMP580",
+      "name": "Adafruit BMP580 I2C or SPI Temperature and Pressure Sensor",
+      "kind": "absolute_pressure_sensor",
+      "verification": "manufacturer_documentation_verified",
+      "physical_unit_verified": false,
+      "source_ids": [
+        "bmp580-product",
+        "bmp580-chip",
+        "bmp580-datasheet"
+      ],
+      "specifications": {
+        "Typical absolute pressure accuracy": "30 Pa \u2014 Current Bosch page:\u00b10.30hPa;300\u20131100hPa,-5\u201365\u00b0C",
+        "Typical relative pressure accuracy": "6 Pa \u2014 Current Bosch page:\u00b10.06hPa;700\u20131100hPa,15\u201355\u00b0C",
+        "Typical pressure RMS noise": "0.08 Pa RMS \u2014 Lowest bandwidth,highest resolution; noise is not absolute accuracy",
+        "Breakout interfaces": "[\"I2C\", \"SPI\"] \u2014 Do not assume every raw-chip interface exposed by this breakout"
+      },
+      "unknowns": [
+        "Physical breakout revision and installed calibration",
+        "Datasheet version reconciliation where older PDF differs from current page"
+      ],
+      "notes": [
+        "Absolute/barometric sensor; not a substitute for direct room-boundary differential pressure measurement.",
+        "Do not confuse low noise/resolution with Pa-level absolute accuracy."
+      ],
+      "simulation_defaults": {},
+      "checked_at": "2026-11-04",
+      "sources": [
+        {
+          "title": "Adafruit BMP580 product 6411",
+          "url": "https://www.adafruit.com/product/6411",
+          "publisher": "Adafruit",
+          "retrieved_at": "2026-11-04",
+          "evidence": "Breakout identity and I2C/SPI interface"
+        },
+        {
+          "title": "Bosch BMP580 technical data",
+          "url": "https://www.bosch-sensortec.com/en/products/environmental-sensors/pressure-sensors/bmp580",
+          "publisher": "Bosch Sensortec",
+          "retrieved_at": "2026-11-04",
+          "evidence": "Current manufacturer technical data; conditions retained"
+        },
+        {
+          "title": "Bosch BMP580 datasheet hosted by breakout manufacturer",
+          "url": "https://cdn-shop.adafruit.com/product-files/6411/BMP580.pdf",
+          "publisher": "Bosch Sensortec via Adafruit",
+          "revision": "BST-BMP580-DS004-02",
+          "retrieved_at": "2026-11-04",
+          "evidence": "Older datasheet differs from current product page in some accuracy/temperature-coefficient values; do not merge values silently"
+        }
+      ]
+    },
+    {
+      "id": "testo-405i",
+      "manufacturer": "Testo",
+      "model": "405i",
+      "name": "Testo 405i hot-wire anemometer wireless Smart Probe",
+      "kind": "air_velocity_instrument",
+      "verification": "manufacturer_documentation_verified",
+      "physical_unit_verified": false,
+      "source_ids": [
+        "testo405i-product"
+      ],
+      "specifications": {
+        "Velocity measurement range": "[0, 30] m/s",
+        "Velocity accuracy,low band": "\u00b1(0.1m/s + 5% of reading) m/s \u2014 0\u20132m/s",
+        "Velocity accuracy,middle band": "\u00b1(0.3m/s + 5% of reading) m/s \u2014 2\u201315m/s; no accuracy invented for15\u201330m/s",
+        "Temperature range": "[-20, 60] \u00b0C",
+        "Temperature accuracy": "0.5 \u00b0C"
+      },
+      "unknowns": [
+        "Unit serial and calibration certificate/status",
+        "Probe orientation,traverse profile,area and installation uncertainty",
+        "Exact app/export method on the team phone"
+      ],
+      "notes": [
+        "Volume flow requires correct duct area and representative velocity sampling.",
+        "Velocity is not a signed doorway-flow measurement.",
+        "At0.1m/s the published low-band error term is\u00b10.105m/s before setup uncertainty."
+      ],
+      "simulation_defaults": {},
+      "checked_at": "2026-11-04",
+      "sources": [
+        {
+          "title": "Testo 405i official product",
+          "url": "https://www.testo.com/en-US/smart-zond-testo-405i/p/0560-1405",
+          "publisher": "Testo",
+          "retrieved_at": "2026-11-04",
+          "evidence": "Ranges, accuracy bands, Bluetooth/app workflow"
+        }
+      ]
+    },
+    {
+      "id": "delta-bfb0712hh-awph",
+      "manufacturer": "Delta Electronics",
+      "model": "BFB0712HH-AWPH",
+      "name": "Delta BFB0712HH-AWPH DC centrifugal blower",
+      "kind": "fan",
+      "verification": "manufacturer_documentation_verified",
+      "physical_unit_verified": false,
+      "source_ids": [
+        "delta-spec",
+        "delta-product"
+      ],
+      "specifications": {
+        "Rated voltage": "12 V DC \u2014 Printed p1",
+        "Operating voltage": "[7, 13.8] V DC \u2014 Printed p1",
+        "Rated average current": "0.34 A \u2014 Printed p1;max0.42A; label safety current0.42A",
+        "Rated average power": "4.08 W \u2014 Printed p1;max5.04W",
+        "Rated speed": "4400 RPM \u2014 \u00b110%;printed p1",
+        "Maximum free-air flow": "0.434 m\u00b3/min \u2014 ZERO STATIC PRESSURE;printed p1. Not installed flow.",
+        "Maximum static pressure": "24.816 mmH2O \u2014 ZERO AIRFLOW;printed p1. Not simultaneous with free-air maximum.",
+        "Preferred PWM frequency": "25 kHz \u2014 Printed p7",
+        "PWM high minimum": "2.8 V \u2014 Printed p7;signal range0\u20135.5V;low<=0.8V",
+        "Manufacturer lead functions": "{\"black\": \"negative\", \"red\": \"positive\", \"yellow\": \"F00 / FG tach\", \"blue\": \"PWM\"} \u2014 Printed p5 drawing visually checked. Verify actual unit and cable before wiring."
+      },
+      "unknowns": [
+        "Physical-unit suffix/lead mapping",
+        "Measured operating flow and installed system resistance",
+        "Digitized fan curve for solver use",
+        "Controller/fuse selection and startup measurement",
+        "ESP32-safe tach/interface implementation"
+      ],
+      "notes": [
+        "Free-air flow and shutoff pressure are separate endpoints; do not use either as a constant installed airflow.",
+        "PWM0%=stop,100%=maximum; disconnected PWM=maximum per printed p7;minimum startup duty max30%at25\u00b0C/12V.",
+        "FG is open collector;datasheet p6 specifies5Vtyp pull-up and5mAmax; do not connect a5V signal directly to ESP32 input.",
+        "Source test conditions include10min warmup,25\u00b0C,65%RH,760mmHg."
+      ],
+      "simulation_defaults": {},
+      "checked_at": "2026-11-04",
+      "sources": [
+        {
+          "title": "Delta BFB0712HH-AWPH specification for approval",
+          "url": "https://www.delta-fan.com/Download/Spec/BFB0712HH-AWPH.pdf",
+          "publisher": "Delta Electronics",
+          "revision": "Sample revision00; sample issue JUL-03-2020",
+          "retrieved_at": "2026-11-04",
+          "evidence": "Downloaded PDF, exact suffix; printed pp1-7. Image-only dimension drawing p5 visually inspected.",
+          "sha256": "2b2d61b191a391ab3b32b9fc3dc0b5422215afff2f865cb8f05ef23264b8a1bd"
+        },
+        {
+          "title": "Delta BFB0712HH-AWPH exact product",
+          "url": "https://www.delta-fan.com/products/dc-centrifugal-fans/bfb/bfb0712hh-awph.html",
+          "publisher": "Delta Electronics",
+          "retrieved_at": "2026-11-04",
+          "evidence": "Manufacturer search index; primary PDF is numerical authority"
+        }
+      ]
+    },
+    {
+      "id": "dfrobot-c5",
+      "manufacturer": "DFRobot",
+      "model": "DFR1222",
+      "name": "FireBeetle 2 ESP32-C5 IoT Development Board",
+      "kind": "controller",
+      "verification": "Manufacturer documentation reviewed; physical board revision unverified",
+      "physical_unit_verified": false,
+      "source_ids": [
+        "dfrobot-c5"
+      ],
+      "specifications": {
+        "Documented interface": "SDA GPIO 9; SCL GPIO 10; regulated 3.3 V output distinct from switched 3V3_C. \u2014 Match exact SKU and PCB revision before wiring."
+      },
+      "unknowns": [
+        "Physical unit identification and revision",
+        "Installed wiring and functional test"
+      ],
+      "notes": [
+        "Reference documentation does not establish successful physical operation."
+      ],
+      "simulation_defaults": {},
+      "checked_at": "2026-11-04",
+      "sources": [
+        {
+          "title": "FireBeetle 2 ESP32-C5 IoT Development Board",
+          "url": "https://wiki.dfrobot.com/dfr1222/",
+          "publisher": "DFRobot",
+          "retrieved_at": "2026-11-04",
+          "evidence": "Official board pin definition / pinout documentation"
+        }
+      ]
+    },
+    {
+      "id": "adafruit-tca9548a",
+      "manufacturer": "Adafruit",
+      "model": "2717 / TCA9548A",
+      "name": "TCA9548A 1-to-8 I2C Multiplexer Breakout",
+      "kind": "interface",
+      "verification": "Manufacturer documentation reviewed; physical board revision unverified",
+      "physical_unit_verified": false,
+      "source_ids": [
+        "adafruit-tca9548a"
+      ],
+      "specifications": {
+        "Documented interface": "Default address 0x70; channels SD0/SC0 through SD7/SC7; downstream pull-ups not installed on the documented breakout. \u2014 Match exact SKU and PCB revision before wiring."
+      },
+      "unknowns": [
+        "Physical unit identification and revision",
+        "Installed wiring and functional test"
+      ],
+      "notes": [
+        "Reference documentation does not establish successful physical operation."
+      ],
+      "simulation_defaults": {},
+      "checked_at": "2026-11-04",
+      "sources": [
+        {
+          "title": "TCA9548A 1-to-8 I2C Multiplexer Breakout",
+          "url": "https://learn.adafruit.com/adafruit-tca9548a-1-to-8-i2c-multiplexer-breakout/pinouts",
+          "publisher": "Adafruit",
+          "retrieved_at": "2026-11-04",
+          "evidence": "Official board pin definition / pinout documentation"
+        }
+      ]
+    }
+  ]
+}

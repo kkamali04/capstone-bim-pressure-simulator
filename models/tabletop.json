@@ -1,0 +1,341 @@
+{
+  "schema": "pci-bim-1",
+  "source": {
+    "name": "Professor tabletop concept: 16 / 14 / 36 inch zones",
+    "ifc_schema": "PLANNED_GEOMETRY",
+    "parser_version": "manual-nominal-1",
+    "geometry_units": "m",
+    "axis": "XYZ; Z vertical",
+    "display_origin_translation_m": [
+      0,
+      0,
+      0
+    ],
+    "provenance": "Nominal dimensions from project context; this preset is not an IFC import or as-built survey"
+  },
+  "entities": [
+    {
+      "id": "TABLETOP-CORRIDOR",
+      "name": "Corridor",
+      "class": "IfcSpace",
+      "storey": "Nominal tabletop",
+      "bbox": [
+        [
+          0.0,
+          0,
+          0
+        ],
+        [
+          0.4064,
+          0.6095999999999999,
+          0.4572
+        ]
+      ],
+      "vertices": [
+        0.0,
+        0,
+        0,
+        0.4064,
+        0,
+        0,
+        0.4064,
+        0.6095999999999999,
+        0,
+        0.0,
+        0.6095999999999999,
+        0,
+        0.0,
+        0,
+        0.4572,
+        0.4064,
+        0,
+        0.4572,
+        0.4064,
+        0.6095999999999999,
+        0.4572,
+        0.0,
+        0.6095999999999999,
+        0.4572
+      ],
+      "faces": [
+        0,
+        2,
+        1,
+        0,
+        3,
+        2,
+        4,
+        5,
+        6,
+        4,
+        6,
+        7,
+        0,
+        1,
+        5,
+        0,
+        5,
+        4,
+        1,
+        2,
+        6,
+        1,
+        6,
+        5,
+        2,
+        3,
+        7,
+        2,
+        7,
+        6,
+        3,
+        0,
+        4,
+        3,
+        4,
+        7
+      ],
+      "properties": {
+        "nominal_length_in": 16,
+        "nominal_depth_in": 24,
+        "nominal_height_in": 18,
+        "geometry_status": "Planned nominal dimensions; not as-built or IFC-imported"
+      },
+      "volume_m3": 0.11326738636799999,
+      "volume_quality": "closed-mesh",
+      "volume_basis": "Nominal rectangular clear-space dimensions; partition thickness excluded; verify as-built"
+    },
+    {
+      "id": "TABLETOP-VESTIBULE",
+      "name": "Vestibule",
+      "class": "IfcSpace",
+      "storey": "Nominal tabletop",
+      "bbox": [
+        [
+          0.4064,
+          0,
+          0
+        ],
+        [
+          0.762,
+          0.6095999999999999,
+          0.4572
+        ]
+      ],
+      "vertices": [
+        0.4064,
+        0,
+        0,
+        0.762,
+        0,
+        0,
+        0.762,
+        0.6095999999999999,
+        0,
+        0.4064,
+        0.6095999999999999,
+        0,
+        0.4064,
+        0,
+        0.4572,
+        0.762,
+        0,
+        0.4572,
+        0.762,
+        0.6095999999999999,
+        0.4572,
+        0.4064,
+        0.6095999999999999,
+        0.4572
+      ],
+      "faces": [
+        0,
+        2,
+        1,
+        0,
+        3,
+        2,
+        4,
+        5,
+        6,
+        4,
+        6,
+        7,
+        0,
+        1,
+        5,
+        0,
+        5,
+        4,
+        1,
+        2,
+        6,
+        1,
+        6,
+        5,
+        2,
+        3,
+        7,
+        2,
+        7,
+        6,
+        3,
+        0,
+        4,
+        3,
+        4,
+        7
+      ],
+      "properties": {
+        "nominal_length_in": 14,
+        "nominal_depth_in": 24,
+        "nominal_height_in": 18,
+        "geometry_status": "Planned nominal dimensions; not as-built or IFC-imported"
+      },
+      "volume_m3": 0.099108963072,
+      "volume_quality": "closed-mesh",
+      "volume_basis": "Nominal rectangular clear-space dimensions; partition thickness excluded; verify as-built"
+    },
+    {
+      "id": "TABLETOP-LAB",
+      "name": "Mock lab",
+      "class": "IfcSpace",
+      "storey": "Nominal tabletop",
+      "bbox": [
+        [
+          0.762,
+          0,
+          0
+        ],
+        [
+          1.6764,
+          0.6095999999999999,
+          0.4572
+        ]
+      ],
+      "vertices": [
+        0.762,
+        0,
+        0,
+        1.6764,
+        0,
+        0,
+        1.6764,
+        0.6095999999999999,
+        0,
+        0.762,
+        0.6095999999999999,
+        0,
+        0.762,
+        0,
+        0.4572,
+        1.6764,
+        0,
+        0.4572,
+        1.6764,
+        0.6095999999999999,
+        0.4572,
+        0.762,
+        0.6095999999999999,
+        0.4572
+      ],
+      "faces": [
+        0,
+        2,
+        1,
+        0,
+        3,
+        2,
+        4,
+        5,
+        6,
+        4,
+        6,
+        7,
+        0,
+        1,
+        5,
+        0,
+        5,
+        4,
+        1,
+        2,
+        6,
+        1,
+        6,
+        5,
+        2,
+        3,
+        7,
+        2,
+        7,
+        6,
+        3,
+        0,
+        4,
+        3,
+        4,
+        7
+      ],
+      "properties": {
+        "nominal_length_in": 36,
+        "nominal_depth_in": 24,
+        "nominal_height_in": 18,
+        "geometry_status": "Planned nominal dimensions; not as-built or IFC-imported"
+      },
+      "volume_m3": 0.254851619328,
+      "volume_quality": "closed-mesh",
+      "volume_basis": "Nominal rectangular clear-space dimensions; partition thickness excluded; verify as-built"
+    }
+  ],
+  "candidate_links": [
+    {
+      "a": "TABLETOP-CORRIDOR",
+      "b": "TABLETOP-VESTIBULE",
+      "door_id": "TABLETOP-PLANNED-LINK-1",
+      "basis": "Manually planned adjacent-zone airflow connection; physical opening and coefficient require verification",
+      "reviewed": false
+    },
+    {
+      "a": "TABLETOP-VESTIBULE",
+      "b": "TABLETOP-LAB",
+      "door_id": "TABLETOP-PLANNED-LINK-2",
+      "basis": "Manually planned adjacent-zone airflow connection; physical opening and coefficient require verification",
+      "reviewed": false
+    }
+  ],
+  "counts": {
+    "IfcSpace": 3
+  },
+  "import_report": {
+    "spaces": 3,
+    "geometry_success": 3,
+    "geometry_missing": []
+  },
+  "missing": [
+    "As-built dimensions and partition thickness",
+    "Verified opening geometry and leakage coefficients",
+    "Measured supply/exhaust boundary conditions",
+    "Calibrated differential pressure channels and uncertainty"
+  ],
+  "limitations": [
+    "Concept geometry only. No containment safety conclusion can be drawn from this preset.",
+    "All operating values generated by the pressure network setup are SYNTHETIC and require review.",
+    "Adjacent zone links are manually planned semantic relationships, not extracted IFC connectivity.",
+    "Room pressures are relative to a fixed 0 Pa reference. Boundary channel readings must be mapped positive-port minus negative-port."
+  ],
+  "planned_channels": [
+    {
+      "name": "DP-A",
+      "positive_space_id": "TABLETOP-CORRIDOR",
+      "negative_space_id": "TABLETOP-VESTIBULE",
+      "basis": "Planned corridor-to-vestibule mapping; verify physical port orientation"
+    },
+    {
+      "name": "DP-B",
+      "positive_space_id": "TABLETOP-VESTIBULE",
+      "negative_space_id": "TABLETOP-LAB",
+      "basis": "Planned vestibule-to-lab mapping; verify physical port orientation"
+    }
+  ]
+}

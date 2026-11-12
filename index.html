@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PCI / Building workspace</title><link rel="stylesheet" href="viewer.css"><script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script></head><body>
+<header><a class="brand" href="./">PCI<span>Building workspace</span></a><div class="fileTitle" id="fileTitle">No building open</div><a href="https://kkamali04.github.io/capstone-rover-scan-planner/">Rover planner</a><button id="openSimulation" aria-controls="simulationPanel" aria-pressed="false" disabled>Pressure simulation</button><label class="primary">Open BIM<input id="openFile" type="file" accept=".ifc,.json" hidden></label></header>
+<main><aside class="navigator"><div class="sectionTitle"><h1>Model explorer</h1><span id="total">0</span></div><input id="search" type="search" placeholder="Find an object…" aria-label="Find an object"><label>Floor<select id="floor"><option value="">All floors</option></select></label><label>Object type<select id="type"><option value="">All types</option></select></label><label class="check"><input id="spaces" type="checkbox"> Show room volumes</label><div id="objects" class="objects"><p class="quiet">Objects will appear here when you open a model.</p></div><div class="navfoot" id="counts">No model loaded</div></aside>
+<section class="stage"><div class="toolbar"><div class="group"><select id="sample" aria-label="Open a sample"><option value="">Or explore a sample model</option></select><button id="orbitView" disabled>3D</button><button id="planView" disabled>Plan</button><button id="fit" disabled>Fit model</button></div><div class="group"><label>Cut height<input id="section" aria-label="Cut height" type="range" min="0" max="100" value="100" disabled></label><button id="reset" disabled>Show all</button></div></div><div id="viewport" tabindex="0" aria-label="Interactive building model">
+<div id="pressureHud" class="pressureHud" hidden>
+  <div class="pressureHudReading"><strong id="pressureRoomName"></strong><output id="pressureRoomValue"></output></div>
+  <div class="pressureScale" aria-label="Fixed pressure scale from minus 5 to plus 5 pascals">
+    <span>−5 Pa</span><span>0 Pa</span><span>+5 Pa</span>
+  </div>
+  <div id="pressureReference"></div>
+  <div id="pressureCellsNote"></div>
+</div><div id="empty"><div class="emptyMark">⌑</div><h2>Open a building.<br>See what’s inside.</h2><p>Explore rooms, equipment and the properties recorded in your BIM.</p><label class="primary">Choose IFC file<input id="emptyFile" type="file" accept=".ifc,.json" hidden></label><p class="small">IFC2x3 and IFC4 · Up to 30 MB<br>Export Revit models to IFC first.</p></div><div id="busy" hidden><p id="progress">Opening model…</p><button id="cancel">Cancel import</button></div><div id="axes" hidden>X / Y / Z · meters</div></div><section id="simPlayback" class="simPlayback" hidden>
+<div class="pressureViewControls">
+  <label><input type="checkbox" id="simVoxels" checked disabled> 3D cells</label>
+  <label><input type="checkbox" id="simContext" checked disabled> Show building</label>
+  <button id="simFocus" type="button" disabled>Focus room</button>
+</div>
+<div class="simPlaybackBar"><button id="simPlay" disabled>Play</button><label>Time<input id="simTimeline" aria-label="Simulation time step" type="range" min="0" max="120" step="1" value="0" disabled></label><output id="simTime">0.0 s</output></div>
+<canvas id="simChart" width="680" height="126" aria-label="Room differential pressure over time"></canvas>
+<div class="simLegend">Model pressure (Pa) · green trace · imported points amber · synthetic sensor bias violet</div>
+</section><div class="statusbar"><span id="status" role="status">Drop an IFC file anywhere to begin.</span><span id="rendererNote"></span></div></section>
+<aside class="inspector"><div id="engineeringPane"><div class="sectionTitle"><h2>Room &amp; equipment</h2><button id="reviewModel" disabled>Readiness</button></div><p class="quiet saveNote">Edits stay in this tab. Download a reviewed project to save your work.</p><div id="engineeringDetails"></div><details class="sourceMetadata"><summary>Source IFC properties</summary><div id="details"><p class="quiet">Select an object in the model or explorer to inspect it.</p></div></details><div class="actions"><button id="saveProject" disabled>Download reviewed project</button><button id="isolate" disabled>Isolate selection</button><button id="hide" disabled>Hide selection</button><button id="export" disabled>Export object inventory</button></div><details class="support"><summary>Supported files and limits</summary><p>IFC2x3 / IFC4 (.ifc) and PCI geometry JSON. Native RVT, DWG and IFCZIP need conversion. Maximum 2,000 objects, 600,000 triangles and 30 MB. Only geometry and properties actually represented in the file can be shown. <a href="./downloads/PCI_Public_Research_BIM.zip" download>Download research BIM samples</a>.</p><p>Room membership uses IFC relationships or explicit manual review. Manufacturer ratings, installed measurements and unknown values remain distinct. Download your reviewed project to save edits; there is no server autosave.</p></details></div><section id="simulationPanel" hidden>
+  <div class="sectionTitle"><h2>Pressure simulation</h2><button id="simInspect">Inspector</button></div>
+  <p id="simStatus" class="quiet" role="status">Open a building to begin.</p>
+  <label>Room to view or target<select id="simulationRoom"></select></label>
+  <details class="simDetails" open>
+    <summary>Network inputs for this room</summary>
+    <p id="simBasis" class="quiet"></p>
+    <div class="simFields">
+      <label>Supply (m³/h)<input id="simSupply" type="number" min="0" step="any" required></label>
+      <label>Exhaust (m³/h)<input id="simExhaust" type="number" min="0" step="any" required></label>
+    </div>
+    <label>Reference leakage (m³/s/√Pa)<input id="simLeak" type="number" min="0.000000001" step="any" required></label>
+    <p id="simReferenceDoors" class="quiet"></p>
+  </details>
+  <label>Scenario<select id="simScenario">
+    <option value="normal">Normal operation</option><option value="exhaust">Exhaust degradation</option>
+    <option value="supply">Excess supply</option><option value="supplyLoss">Supply loss</option>
+    <option value="leak">Increased reference leakage</option><option value="door">Door opens</option>
+    <option value="sensor">Sensor bias</option>
+  </select></label>
+  <div class="simFields">
+    <label>Severity (%)<input id="simSeverity" type="number" min="0" max="100" value="70" required></label>
+    <label>Threshold (Pa)<input id="simThreshold" type="number" min="0" step="any" value="0.2" required></label>
+    <label>Start (s)<input id="simStart" type="number" min="0" max="59" step="any" value="10" required></label>
+    <label>Recovery (s)<input id="simEnd" type="number" min="1" max="60" step="any" value="45" required></label>
+  </div>
+  <label class="check"><input id="simConfirm" type="checkbox"> I reviewed the inputs for this demo</label>
+  <button id="simRun" class="primary" disabled>Run scenario</button>
+  <dl class="simMetrics">
+    <div><dt>Current ΔP</dt><dd id="simPressure">—</dd></div>
+    <div><dt>Baseline ΔP</dt><dd id="simBaseline">—</dd></div>
+    <div><dt>Change from baseline</dt><dd id="simChange">—</dd></div>
+    <div><dt>Peak ΔP</dt><dd id="simPeak">—</dd></div>
+    <div><dt>Above threshold</dt><dd id="simDuration">—</dd></div>
+    <div><dt>Flow balance residual</dt><dd id="simResidual">—</dd></div>
+  </dl>
+  <details class="simDetails"><summary>Affected rooms</summary><ol id="simSummary"></ol></details>
+  <details id="simEvidenceDetails" class="simDetails"><summary>Possible causes and evidence to check</summary><ul id="simEvidence"></ul></details>
+  <details id="simFlowDetails" class="simDetails"><summary>Internal airflow at this frame</summary><ul id="simFlows"></ul></details>
+  <details class="simDetails" open><summary>Compare a recording</summary>
+    <label>Pressure CSV<input id="simCSV" type="file" accept=".csv,text/csv"></label>
+    <button id="simExample" disabled>Load synthetic example</button>
+    <p id="simRecording" class="quiet" role="status">No recording loaded.</p>
+    <p id="simComparison" class="quiet"></p>
+    <details><summary>CSV format</summary><p class="quiet"><code>time_s,space_id,pressure_pa</code> or <code>time_s,positive_space_id,negative_space_id,pressure_pa</code>. Use IFC room IDs and REFERENCE for the fixed 0 Pa reference.</p></details>
+  </details>
+  <details class="simDetails"><summary>Fit reference leakage</summary>
+    <p class="quiet">Use separate steady baseline CSV recordings with room-to-reference pressure, known flows, and the same sensor reference. Fits one common leakage multiplier.</p>
+    <label>Calibration CSV<input id="simFitCSV" type="file" accept=".csv"></label>
+    <label>Holdout CSV<input id="simHoldoutCSV" type="file" accept=".csv"></label>
+    <button id="simFit">Fit and evaluate</button>
+    <p id="simFitResult" class="quiet" role="status"></p>
+  </details>
+  <div class="actions"><button id="simExport" disabled>Download simulated CSV</button><button id="simValidationExport" disabled>Download run evidence</button></div>
+</section>
+</aside></main><script type="module" src="viewer.js"></script></body></html>

@@ -1,0 +1,54 @@
+{
+  "scope": "Synthetic one-parameter calibration and held-out comparison verification; no physical accuracy claim.",
+  "passed": 12,
+  "tests": [
+    {
+      "name": "Known global leakage multiplier recovered from independent synthetic operating cases",
+      "status": "pass"
+    },
+    {
+      "name": "Held-out new operating case improves without participating in fit",
+      "status": "pass"
+    },
+    {
+      "name": "Metric sign and RMSE reflect observed minus predicted",
+      "status": "pass"
+    },
+    {
+      "name": "Calibration and holdout reject reuse of whole run identity",
+      "status": "pass"
+    },
+    {
+      "name": "Distinct run IDs may legitimately reuse relative timestamps",
+      "status": "pass"
+    },
+    {
+      "name": "Provenance mixing is blocked",
+      "status": "pass"
+    },
+    {
+      "name": "Balanced network rejects unidentifiable leakage fit",
+      "status": "pass"
+    },
+    {
+      "name": "Differential endpoint observations use Pplus minus Pminus",
+      "status": "pass"
+    },
+    {
+      "name": "Out-of-bound optimum is flagged instead of claiming a trusted estimate",
+      "status": "pass"
+    },
+    {
+      "name": "Invalid pressure, endpoint, uncertainty, operating flows and duplicate time rejected",
+      "status": "pass"
+    },
+    {
+      "name": "Fitting never changes caller config or source measurements",
+      "status": "pass"
+    },
+    {
+      "name": "Simple UI wrapper recovers baseline scale and reports unverified import provenance",
+      "status": "pass"
+    }
+  ]
+}

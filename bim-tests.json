@@ -1,0 +1,78 @@
+{
+  "scope": "Numerical and import verification of the supplied public IFC model only. No biosafety field validation or CFD validation.",
+  "passed": 18,
+  "tests": [
+    {
+      "name": "Downloaded architecture parses as 21 IFC spaces and 14 doors",
+      "status": "pass"
+    },
+    {
+      "name": "Source geometry normalized to SI meters with hash and original GUIDs",
+      "status": "pass"
+    },
+    {
+      "name": "All meshes have finite vertices and valid triangle indices",
+      "status": "pass"
+    },
+    {
+      "name": "No source geometry conversion failures",
+      "status": "pass"
+    },
+    {
+      "name": "No duplicate IFC identities",
+      "status": "pass"
+    },
+    {
+      "name": "Door graph uses source semantic endpoints; unresolved links excluded",
+      "status": "pass"
+    },
+    {
+      "name": "Run blocked before assumption approval",
+      "status": "pass"
+    },
+    {
+      "name": "Invalid leakage rejected",
+      "status": "pass"
+    },
+    {
+      "name": "Invalid connection endpoint rejected",
+      "status": "pass"
+    },
+    {
+      "name": "Single-zone analytical solution is -25 Pa",
+      "status": "pass"
+    },
+    {
+      "name": "Balanced supply/exhaust yields zero room pressure",
+      "status": "pass"
+    },
+    {
+      "name": "Public-model network converges and conserves airflow",
+      "status": "pass"
+    },
+    {
+      "name": "Synthetic normal pressures negative and severe exhaust loss reverses target",
+      "status": "pass"
+    },
+    {
+      "name": "Reversal metric counts sample-aligned duration without a phantom last interval",
+      "status": "pass"
+    },
+    {
+      "name": "Every generated time sample has finite pressure and small flow residual",
+      "status": "pass"
+    },
+    {
+      "name": "Sensor CSV accepts valid time, GUID and pressure",
+      "status": "pass"
+    },
+    {
+      "name": "CSV rejects unknown GUID, empty pressure, NaN and duplicate timestamp/room",
+      "status": "pass"
+    },
+    {
+      "name": "Malformed and wrong-unit model package rejected",
+      "status": "pass"
+    }
+  ]
+}

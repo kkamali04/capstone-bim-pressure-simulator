@@ -1,0 +1,66 @@
+{
+  "scope": "Raw IFC parsing, geometry, project round trip and synthetic anomaly verification; browser tests are separate; no field validation.",
+  "passed": 15,
+  "tests": [
+    {
+      "name": "Raw IFC2x3 import preserves 236 objects, 21 rooms and semantic connections",
+      "status": "pass"
+    },
+    {
+      "name": "Every raw-import room GUID, volume and dimensions agrees with offline geometry",
+      "status": "pass"
+    },
+    {
+      "name": "Hallway volumes match BIM-declared 18.115464 m³ after winding correction",
+      "status": "pass"
+    },
+    {
+      "name": "IFC4 millimeter model becomes a 4 × 3 × 2.5 meter room with 30 m³ volume",
+      "status": "pass"
+    },
+    {
+      "name": "IFC without any renderable geometry gives an actionable error",
+      "status": "pass"
+    },
+    {
+      "name": "Open mesh receives a visible approximate-volume basis",
+      "status": "pass"
+    },
+    {
+      "name": "All seven scenarios return finite 121-frame solutions with small balance residuals",
+      "status": "pass"
+    },
+    {
+      "name": "Exhaust loss and excess supply raise target pressure; supply loss lowers it",
+      "status": "pass"
+    },
+    {
+      "name": "Increased reference leakage drives target negative pressure toward zero",
+      "status": "pass"
+    },
+    {
+      "name": "Sensor bias preserves physical pressure but adds a separately measurable error",
+      "status": "pass"
+    },
+    {
+      "name": "Door opening equalizes a genuine unequal-pressure connection",
+      "status": "pass"
+    },
+    {
+      "name": "Recovery follows event and returns toward baseline",
+      "status": "pass"
+    },
+    {
+      "name": "Unknown scenarios, invalid event times, missing door and bad target are rejected",
+      "status": "pass"
+    },
+    {
+      "name": "Zero-severity physical scenarios match baseline exactly",
+      "status": "pass"
+    },
+    {
+      "name": "Saved project can be revalidated and yields identical simulation",
+      "status": "pass"
+    }
+  ]
+}

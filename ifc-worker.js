@@ -1,0 +1,3 @@
+import * as W from './vendor/web-ifc/web-ifc-api.js';
+import {convertIFC} from './ifc-convert.js';
+self.onmessage=async({data})=>{try{const bytes=new Uint8Array(data.buffer);const api=new W.IfcAPI();api.SetWasmPath(new URL('./vendor/web-ifc/',import.meta.url).href,true);await api.Init();const m=convertIFC(api,W,bytes,data.name,message=>postMessage({progress:message}));if(self.crypto?.subtle){m.source.sha256=Array.from(new Uint8Array(await self.crypto.subtle.digest('SHA-256',bytes))).map(v=>v.toString(16).padStart(2,'0')).join('');}else{m.source.sha256=null;m.source.hash_note='SHA-256 unavailable in this nonsecure browser context; use HTTPS for source hashing.';}postMessage({model:m});}catch(e){postMessage({error:e.message||String(e)});}};

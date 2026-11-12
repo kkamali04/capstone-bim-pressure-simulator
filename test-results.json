@@ -1,0 +1,50 @@
+{
+  "scope": "Numerical verification only. No independent physical validation or CFD validation.",
+  "passed": 11,
+  "tests": [
+    {
+      "name": "Zero imbalance gives zero pressure",
+      "status": "pass"
+    },
+    {
+      "name": "Single-opening analytical pressure and sign",
+      "status": "pass"
+    },
+    {
+      "name": "Every scenario conserves nodal airflow",
+      "status": "pass"
+    },
+    {
+      "name": "Flow changes sign on pressure reversal",
+      "status": "pass"
+    },
+    {
+      "name": "Normal negative; exhaust failure reverses main room",
+      "status": "pass"
+    },
+    {
+      "name": "Steady closed transport conserves total tracer",
+      "status": "pass"
+    },
+    {
+      "name": "Zero source and initial concentration remain zero",
+      "status": "pass"
+    },
+    {
+      "name": "Transient fan follows exponential response",
+      "status": "pass"
+    },
+    {
+      "name": "Synthetic exhaust template identified from exact readings",
+      "status": "pass"
+    },
+    {
+      "name": "Time-step refinement pressure and tracer converge",
+      "status": "pass"
+    },
+    {
+      "name": "All histories finite, concentration nonnegative",
+      "status": "pass"
+    }
+  ]
+}

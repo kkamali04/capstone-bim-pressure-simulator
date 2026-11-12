@@ -1,0 +1,39 @@
+{
+  "samples": [
+    {
+      "file": "Duplex_A_20110907.ifc",
+      "name": "Public research: Duplex Architecture (residential)",
+      "expected_error": false
+    },
+    {
+      "file": "Duplex_M_20111024_ROOMS_AND_SPACES.ifc",
+      "name": "Public research: Duplex Mechanical (residential)",
+      "expected_error": false
+    },
+    {
+      "file": "01_furnished_lab_IFC4_m.ifc",
+      "name": "Synthetic test: furnished lab IFC4 m",
+      "expected_error": false
+    },
+    {
+      "file": "02_two_storey_IFC2X3_m.ifc",
+      "name": "Synthetic test: two storey IFC2X3 m",
+      "expected_error": false
+    },
+    {
+      "file": "03_geometry_only_IFC4_m.ifc",
+      "name": "Synthetic test: geometry only IFC4 m",
+      "expected_error": false
+    },
+    {
+      "file": "04_furnished_lab_IFC4_mm.ifc",
+      "name": "Synthetic test: furnished lab IFC4 mm",
+      "expected_error": false
+    },
+    {
+      "file": "malformed_truncated.ifc",
+      "name": "Synthetic test: Intentionally malformed IFC (rejection test)",
+      "expected_error": true
+    }
+  ]
+}
