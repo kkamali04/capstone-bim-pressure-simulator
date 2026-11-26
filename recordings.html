@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sure² / Recorded Test Analysis</title>
+<link rel="stylesheet" href="./recordings.css">
+</head>
+<body>
+<header class="app-header"><a class="brand" href="./">Sure² <span>Predictive Containment Intelligence</span></a><a href="./">Building workspace</a></header>
+<main>
+<section class="intro"><div><p class="eyebrow">MEASUREMENT WORKSPACE</p><h1>Recorded Test Analysis</h1><p>Inspect a pressure recording, mark the test events and keep an auditable summary.</p></div><span class="privacy">Files are processed in this tab.</span></section>
+<div class="workspace">
+<aside class="controls">
+<section class="card"><h2>Recording</h2>
+<label>Sensor CSV or serial capture<input id="recordingFile" type="file" accept=".csv,.txt,text/csv,text/plain"></label>
+<p class="help">Use the working sketch at 115200 baud; send <code>c</code> for CSV. Saving a recording still requires serial capture on your computer.</p>
+<label>Units for a generic <code>pressure</code> column<select id="inputUnit"><option value="">Choose verified units</option><option value="Pa">Pa</option><option value="inH2O">inH₂O (conventional)</option><option value="kPa">kPa</option></select></label>
+<p class="help">Headers ending in <code>_pa</code> already declare Pa. Resolve conflicting source labels before import.</p>
+<label>Synthetic software check<select id="example"><option value="">Choose a test recording</option><option value="brief">Brief reversal and recovery · 180 s</option><option value="sustained">Sustained reversal · 240 s</option><option value="gaps">Invalid samples and gaps · 180 s</option></select></label>
+<div id="importStatus" class="notice" role="status">Choose a file or a synthetic recording.</div>
+<details><summary>Supported formats</summary><p class="help">Arduino: <code>time_ms,dp_a_pa,...,dp_a_ok,...</code> with the existing sketch header. Generic: <code>time_s,pressure_pa</code> or <code>time_s,pressure</code>. Optional <code>valid</code> uses 0/1. Room CSV: <code>time_s,space_id,pressure_pa</code>. Boundary CSV: <code>time_s,positive_space_id,negative_space_id,pressure_pa</code>. Time may also be <code>time_ms</code>. Other TEC export layouts need an explicit mapping first.</p></details>
+</section>
+<form id="analysisForm" class="card">
+<h2>Analysis settings</h2>
+<fieldset id="analysisFields" disabled>
+<label>Channel<select id="channel"></select></label>
+<label>Run ID<input id="runId" maxlength="120" value="RUN_20261126_01" required></label>
+<label>Data provenance<select id="source"><option value="IMPORTED_UNVERIFIED">Imported · unverified</option><option value="MEASURED">Measured · user declared</option><option value="SYNTHETIC">Synthetic · software test</option></select></label>
+<div class="two"><label>Positive endpoint<input id="positive" value="CHAMBER" maxlength="120" required></label><label>Negative endpoint<input id="negative" value="REFERENCE" maxlength="120" required></label></div>
+<p class="help">Reported ΔP is positive endpoint minus negative endpoint. Confirm the physical hose mapping. IDs must match your BIM when exporting for comparison.</p>
+<label>Pressure sign<select id="sign"><option value="1">Keep recorded sign (+1)</option><option value="-1">Invert sign (−1), documented correction</option></select></label>
+<div class="two"><label>Baseline start (s)<input id="baselineStart" type="number" min="0" step="any" value="0" required></label><label>Baseline end (s)<input id="baselineEnd" type="number" min="0" step="any" value="10" required></label></div>
+<div class="two"><label>Failure time (s), optional<input id="failure" type="number" min="0" step="any" placeholder="Not marked"></label><label>Restoration time (s), optional<input id="restore" type="number" min="0" step="any" placeholder="Not marked"></label></div>
+<label>Analysis threshold (Pa)<input id="threshold" type="number" min="0" step="any" value="2.5" required></label>
+<p class="help">2.5 Pa is an example analysis limit. Review it for your test. It is not a universal safety or acceptance criterion.</p>
+<div class="two"><label>Recovery band ± (Pa)<input id="recoveryBand" type="number" min="0" step="any" value="0.5" required></label><label>Recovery hold (s)<input id="recoveryHold" type="number" min="0.001" step="any" value="5" required></label></div>
+<label>Maximum connected gap (s), optional<input id="maxGap" type="number" min="0.000001" step="any" placeholder="Auto: 1.5 × median sample interval"></label>
+<div class="two"><label>BIM export start (s)<input id="bimStart" type="number" min="0" step="any" required></label><label>BIM export end (s)<input id="bimEnd" type="number" min="0" step="any" required></label></div>
+<p class="help">The existing simulator compares up to 60 s. Export a declared window of at most 60 s, rebased to zero. Full-recording analysis and JSON remain intact; align the model events to this window.</p>
+<details class="review"><summary>Reviewer context and assessment</summary>
+<label>Reviewer<input id="reviewer" maxlength="200"></label>
+<label>Boundary and normal design intent<textarea id="context" maxlength="2000" rows="2"></textarea></label>
+<div class="two"><label>Initial risk, manual<select id="initialRisk"><option value="">Not assessed</option><option>Low</option><option>Moderate</option><option>High</option><option>Extreme</option></select></label><label>Residual risk, manual<select id="residualRisk"><option value="">Not assessed</option><option>Low</option><option>Moderate</option><option>High</option><option>Extreme</option></select></label></div>
+<label>Review explanation<textarea id="reviewNotes" maxlength="4000" rows="3"></textarea></label>
+<p class="help">No automatic WBHT rating or risk reduction is computed. Residual risk needs a written explanation.</p>
+</details>
+<button id="analyze" class="primary" type="submit">Analyze recording</button>
+</fieldset>
+</form>
+</aside>
+<div class="results">
+<section class="card chart-card"><div class="card-heading"><div><h2>Pressure recording</h2><p id="boundaryLabel" class="help">No recording analyzed.</p></div><strong id="provenance" class="badge">NO DATA</strong></div>
+<div id="chart" class="chart"><div class="empty"><strong>Your full recording belongs here.</strong><p>Upload sensor data or choose a labeled synthetic check.</p></div></div>
+<p class="legend">Blue: recorded pressure · green band: recovery band · dashed red: analysis threshold · crosses and breaks: invalid or unobserved data</p>
+<div class="playback"><button id="play" type="button" disabled>Play</button><input id="timeline" type="range" min="0" max="1" value="0" step="any" aria-label="Recording time" disabled><label>Speed<select id="speed"><option value="1">1×</option><option value="5" selected>5×</option><option value="20">20×</option></select></label><output id="currentTime">0.0 s</output></div>
+<p id="currentPressure" class="reading">Current sample: —</p>
+<div id="analysisStatus" class="notice" role="status">Analysis will use your selected baseline and event settings.</div>
+</section>
+<section id="metrics" class="metrics" aria-label="Recorded test metrics"></section>
+<section class="card"><h2>Data quality and event evidence</h2><div id="quality"><p class="help">Invalid values remain missing. Threshold duration and recovery do not bridge missing readings or long gaps.</p></div><div id="episodes"></div></section>
+<section class="card"><h2>Export this analysis</h2><p class="help">Keep the original recording. The evidence JSON includes settings, flags, mapping and source fingerprint. The normalized CSV contains valid pressure samples for the existing BIM comparison.</p><div class="exports"><button id="exportReport" disabled>Download readable report</button><button id="printReport" disabled>Print / Save PDF</button><button id="exportJSON" disabled>Download evidence JSON</button><button id="exportCSV" disabled>Download BIM window CSV</button></div><p class="help">These outputs describe a recorded test. They do not establish calibrated accuracy, containment certification or predictive validation.</p></section>
+<details class="card"><summary>Method and limitations</summary><p id="method">Baseline uses the sample mean and sample standard deviation. Crossing times are estimated only between connected valid samples. The timeline uses the full recording duration.</p><p class="help">Pressure alone does not determine total airflow. A positive differential needs boundary orientation and design context before it can be interpreted as a reversal. No machine-learning model or automatic risk assessor is used.</p><p class="help">Generic inH₂O conversion uses 249.0889 Pa per conventional inH₂O. Confirm the instrument unit convention before quantitative validation.</p></details>
+</div>
+</div>
+</main>
+<script type="module" src="./recording-ui.js"></script>
+</body></html>
+
