@@ -20,3 +20,9 @@ The buildingSMART International Duplex Apartment Test Files are CC BY 4.0. The r
 - [Duplex_M_20111024_ROOMS_AND_SPACES.ifc](https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/0eedca9e15bd7a551a8ba548fa285bfb01433281/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_M_20111024_ROOMS_AND_SPACES.ifc) — BSI (2020) Duplex Apartment Test Files, buildingSMART International, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
 Third-party libraries retain their included license files under vendor/. The [Rover Scan Planner repository](https://github.com/kkamali04/capstone-rover-scan-planner) contains the companion app source and release history.
+
+## Recorded Test Analysis (November 26, 2026)
+
+Open [Recorded Test Analysis](https://kkamali04.github.io/capstone-bim-pressure-simulator/recordings.html) from the building workspace. It reads the existing Arduino CSV, analyzes recorded pressure independently of the solver, plays the full recording and exports a printable HTML report, JSON evidence and a declared 60-second BIM comparison window. All processing stays in the browser tab; no recordings are uploaded.
+
+Start with a labeled synthetic example, then review the channel, pressure endpoints, provenance, baseline, events, threshold and recovery criterion. Follow [the recorded-test guide](RECORDED_TESTS.md) for data formats, methods, limitations and verification. Original firmware is unchanged. Run checks with `npm test` (Node 18+).
