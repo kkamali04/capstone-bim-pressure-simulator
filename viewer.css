@@ -37,3 +37,5 @@
 .pressureHudReading output{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 .pressureScale{display:flex;justify-content:space-between;margin:8px 0 6px;padding-top:6px;border-top:4px solid transparent;border-image:linear-gradient(90deg,#175bb3,#829096,#c24917) 1;font-size:10px}
 #pressureCellsNote{color:#465753;margin-top:3px}
+
+#simulationPanel textarea,#simulationPanel input:not([type=checkbox]):not([type=file]):not([type=number]){width:100%;display:block;margin-top:5px;padding:8px;border:1px solid #cbd2ca;border-radius:4px;font:inherit;color:#29342d}#simulationPanel .simDetails[hidden],#simulationPanel label[hidden],#simDelayFields[hidden]{display:none}#simBaselineReview{padding:9px;border-radius:5px;background:#edf4f3;color:#315758}#simEventSchedule{font-size:13px}#simChart{height:140px}.simMetrics dt{font-size:12px}.simLegend{font-size:12px}

@@ -8,7 +8,15 @@ University of Maryland Cyber-Physical Systems Engineering capstone. This browser
 At 0, 30, and 60 seconds, the example predicts −1.78, +2.61, and −1.65 Pa. These are simulated room-to-reference pressures. The recording bundled for comparison is synthetic.
 
 ## Run locally
-Serve the repository root over HTTP, for example with `python -m http.server 8000`, and open `http://localhost:8000/`. IFC files are parsed in the browser. Choose a bundled example or select **Open BIM** to use an IFC file.
+Run `npm run dev` and open the URL printed by the server. IFC files are parsed in the browser. Choose a bundled example or select **Open BIM** to use an IFC file.
+
+## Baseline and HVAC test sequences (November 27, 2026)
+
+The main 3D workspace now captures normal modeled operation and design intent before a sequenced test. It supports delayed supply shutdown after exhaust loss, simultaneous supply/exhaust loss, exhaust loss in two rooms, and sustained exhaust loss. Runs extend to 600 seconds with explicit assumed flow ramps and restoration timing.
+
+Select a room-to-reference or room-to-room pressure pair for the chart, peak and time-above-threshold review. The 3D cells continue to show each room's pressure relative to the fixed reference. Download a self-contained test summary, boundary CSV and JSON evidence. Editing normal flow inputs invalidates the reviewed baseline and old results.
+
+Follow [the HVAC test walkthrough](HVAC_TESTS.md) for a reproducible demonstration and interpretation limits. These are synthetic aggregate-flow scenarios informed by the sponsor's testing workflow; they do not recreate a facility or establish biological risk. [Verification](HVAC_TEST_VERIFICATION.md) records the checks performed.
 
 ## Companion project
 [Open the Rover Scan Planner](https://kkamali04.github.io/capstone-rover-scan-planner/) to explore 12 floor stations at three probe heights.

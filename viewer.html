@@ -17,7 +17,7 @@
 </div>
 <div class="simPlaybackBar"><button id="simPlay" disabled>Play</button><label>Time<input id="simTimeline" aria-label="Simulation time step" type="range" min="0" max="120" step="1" value="0" disabled></label><output id="simTime">0.0 s</output></div>
 <canvas id="simChart" width="680" height="126" aria-label="Room differential pressure over time"></canvas>
-<div class="simLegend">Model pressure (Pa) · green trace · imported points amber · synthetic sensor bias violet</div>
+<div class="simLegend">Chart: selected pressure boundary (Pa) · modeled green · imported amber · synthetic bias violet. Cells: room-to-fixed-reference pressure.</div>
 </section><div class="statusbar"><span id="status" role="status">Drop an IFC file anywhere to begin.</span><span id="rendererNote"></span></div></section>
 <aside class="inspector"><div id="engineeringPane"><div class="sectionTitle"><h2>Room &amp; equipment</h2><button id="reviewModel" disabled>Readiness</button></div><p class="quiet saveNote">Edits stay in this tab. Download a reviewed project to save your work.</p><div id="engineeringDetails"></div><details class="sourceMetadata"><summary>Source IFC properties</summary><div id="details"><p class="quiet">Select an object in the model or explorer to inspect it.</p></div></details><div class="actions"><button id="saveProject" disabled>Download reviewed project</button><button id="isolate" disabled>Isolate selection</button><button id="hide" disabled>Hide selection</button><button id="export" disabled>Export object inventory</button></div><details class="support"><summary>Supported files and limits</summary><p>IFC2x3 / IFC4 (.ifc) and PCI geometry JSON. Native RVT, DWG and IFCZIP need conversion. Maximum 2,000 objects, 600,000 triangles and 30 MB. Only geometry and properties actually represented in the file can be shown. <a href="./downloads/PCI_Public_Research_BIM.zip" download>Download research BIM samples</a>.</p><p>Room membership uses IFC relationships or explicit manual review. Manufacturer ratings, installed measurements and unknown values remain distinct. Download your reviewed project to save edits; there is no server autosave.</p></details></div><section id="simulationPanel" hidden>
   <div class="sectionTitle"><h2>Pressure simulation</h2><button id="simInspect">Inspector</button></div>
@@ -33,18 +33,39 @@
     <label>Reference leakage (m³/s/√Pa)<input id="simLeak" type="number" min="0.000000001" step="any" required></label>
     <p id="simReferenceDoors" class="quiet"></p>
   </details>
+  <details class="simDetails" open>
+    <summary>Baseline operation / design intent</summary>
+    <p class="quiet">Review normal operation before a sequenced failure test. This captures modeled inputs, not a measured calibration.</p>
+    <label>Design intent<textarea id="simDesignIntent" rows="2" maxlength="3000">Illustrative pressure-control baseline; operating values are assumed until measured.</textarea></label>
+    <label>Reviewer, optional<input id="simReviewer" maxlength="200"></label>
+    <div class="simFields"><label>Entered room band min (Pa), optional<input id="simBandMin" type="number" step="any"></label><label>Entered room band max (Pa), optional<input id="simBandMax" type="number" step="any"></label></div>
+    <button id="simCaptureBaseline">Capture reviewed baseline</button>
+    <p id="simBaselineReview" class="quiet" role="status">No reviewed baseline captured.</p>
+  </details>
   <label>Scenario<select id="simScenario">
     <option value="normal">Normal operation</option><option value="exhaust">Exhaust degradation</option>
     <option value="supply">Excess supply</option><option value="supplyLoss">Supply loss</option>
     <option value="leak">Increased reference leakage</option><option value="door">Door opens</option>
-    <option value="sensor">Sensor bias</option>
+    <option value="sensor">Sensor bias</option><option value="sequenced">Sequenced HVAC failures</option>
   </select></label>
   <div class="simFields">
     <label>Severity (%)<input id="simSeverity" type="number" min="0" max="100" value="70" required></label>
     <label>Threshold (Pa)<input id="simThreshold" type="number" min="0" step="any" value="0.2" required></label>
-    <label>Start (s)<input id="simStart" type="number" min="0" max="59" step="any" value="10" required></label>
-    <label>Recovery (s)<input id="simEnd" type="number" min="1" max="60" step="any" value="45" required></label>
+    <label>Start (s)<input id="simStart" type="number" min="0" max="599" step="any" value="10" required></label>
+    <label>Recovery (s)<input id="simEnd" type="number" min="1" max="600" step="any" value="45" required></label>
   </div>
+  <div class="simFields">
+    <label>Run duration (s)<input id="simHorizon" type="number" min="1" max="600" step="any" value="60" required></label>
+    <label>Assumed input ramp (s)<input id="simRamp" type="number" min="0.1" max="60" step="any" value="4" required></label>
+  </div>
+  <details id="simSequenceControls" class="simDetails" hidden open>
+    <summary>Failure / restoration sequence</summary>
+    <label>Test pattern<select id="simTestPattern"><option value="exhaustSupplyLag">Exhaust loss with delayed supply shutdown</option><option value="simultaneous">Supply and exhaust loss together</option><option value="twoExhaust">Exhaust loss in two rooms</option><option value="sustainedExhaust">Sustained exhaust loss</option></select></label>
+    <label id="simSecondRoomLabel" hidden>Second exhaust room<select id="simSecondRoom"></select></label>
+    <div id="simDelayFields" class="simFields"><label>Supply shutdown delay (s)<input id="simSupplyDelay" type="number" min="0" max="600" step="any" value="3"></label><label>Supply restoration delay (s)<input id="simRestoreDelay" type="number" min="0" max="600" step="any" value="5"></label></div>
+    <p class="quiet">Actions change aggregate room flows. They do not represent identified EF-1/EF-2 fan curves. The response ramp is an assumption. Sustained loss has no restoration inside the run.</p>
+    <ol id="simEventSchedule"></ol>
+  </details>
   <label class="check"><input id="simConfirm" type="checkbox"> I reviewed the inputs for this demo</label>
   <button id="simRun" class="primary" disabled>Run scenario</button>
   <dl class="simMetrics">
@@ -55,6 +76,13 @@
     <div><dt>Above threshold</dt><dd id="simDuration">—</dd></div>
     <div><dt>Flow balance residual</dt><dd id="simResidual">—</dd></div>
   </dl>
+  <details class="simDetails" open>
+    <summary>Boundary-pressure review</summary>
+    <label>Compare selected room against<select id="simBoundaryNegative"><option value="REFERENCE">Fixed reference (0 Pa)</option></select></label>
+    <p id="simBoundaryBasis" class="quiet">The chart follows this pressure pair. 3D cells retain room-to-fixed-reference pressure.</p>
+    <dl class="simMetrics"><div><dt>Boundary ΔP now</dt><dd id="simBoundaryNow">—</dd></div><div><dt>Normal boundary ΔP</dt><dd id="simBoundaryNormal">—</dd></div><div><dt>Boundary peak</dt><dd id="simBoundaryPeak">—</dd></div><div><dt>Boundary time above threshold</dt><dd id="simBoundaryTime">—</dd></div></dl>
+    <p class="quiet">Thresholds are review settings, not universal acceptance limits. No biological-risk rating is computed.</p>
+  </details>
   <details class="simDetails"><summary>Affected rooms</summary><ol id="simSummary"></ol></details>
   <details id="simEvidenceDetails" class="simDetails"><summary>Possible causes and evidence to check</summary><ul id="simEvidence"></ul></details>
   <details id="simFlowDetails" class="simDetails"><summary>Internal airflow at this frame</summary><ul id="simFlows"></ul></details>
@@ -72,6 +100,6 @@
     <button id="simFit">Fit and evaluate</button>
     <p id="simFitResult" class="quiet" role="status"></p>
   </details>
-  <div class="actions"><button id="simExport" disabled>Download simulated CSV</button><button id="simValidationExport" disabled>Download run evidence</button></div>
+  <div class="actions"><button id="simExport" disabled>Download simulated CSV</button><button id="simValidationExport" disabled>Download run evidence</button><button id="simBoundaryExport" disabled>Download boundary CSV</button><button id="simReportExport" disabled>Download test summary</button></div>
 </section>
 </aside></main><script type="module" src="viewer.js"></script></body></html>

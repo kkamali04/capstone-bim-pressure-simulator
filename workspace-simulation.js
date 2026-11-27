@@ -1,6 +1,7 @@
+import {captureBaseline,baselineMatches,makeTestPlan,runScheduledNetwork,reviewBoundary,boundaryCSV,scenarioReportHTML} from './hvac-test.js';
 import {buildWorkspaceNetwork} from './workspace-network.js';
 import {checkConfig, parseCSV, reversal, runNetwork, SCENARIOS, summarize} from './bim-engine.js';
-import {compareBoundaries, parseBoundaryCSV, REFERENCE} from './channels.js';
+import {compareBoundaries, parseBoundaryCSV, predictBoundary, REFERENCE} from './channels.js';
 import {fitLeakScale, evaluate} from './calibration.js';
 import {faultCandidates} from './engineering.js';
 
@@ -17,6 +18,50 @@ export function workspaceSimulation({getModel, overlay, download}) {
   let loadGeneration = 0;
   let comparison = null;
   let calibrationEvidence = null;
+  let reviewedBaseline=null,testPlan=null,designBands={};
+
+
+  function invalidateBaseline(message='Inputs changed. Capture the normal modeled state again.') {
+    reviewedBaseline=null;
+    $('simBaselineReview').textContent=message;
+  }
+  function fillBoundaryChoices() {
+    const previous=$('simBoundaryNegative').value, second=$('simSecondRoom').value;
+    $('simBoundaryNegative').replaceChildren(new Option('Fixed reference (0 Pa)',REFERENCE),
+      ...(config?.nodes??[]).filter(n=>n.id!==roomPicker.value).map(n=>new Option(n.name,n.id)));
+    if([...$('simBoundaryNegative').options].some(o=>o.value===previous))$('simBoundaryNegative').value=previous;
+    $('simSecondRoom').replaceChildren(...(config?.nodes??[]).map(n=>new Option(n.name,n.id)));
+    $('simSecondRoom').value=(config?.nodes.find(n=>n.id===second&&n.id!==roomPicker.value)??config?.nodes.find(n=>n.id!==roomPicker.value))?.id??roomPicker.value;
+    $('simBoundaryNegative').disabled=$('simCaptureBaseline').disabled=!config?.nodes.length;
+  }
+  function syncTestMode() {
+    const sequenced=$('simScenario').value==='sequenced',pattern=$('simTestPattern').value;
+    $('simSequenceControls').hidden=!sequenced;
+    $('simSecondRoomLabel').hidden=pattern!=='twoExhaust';
+    $('simDelayFields').hidden=pattern!=='exhaustSupplyLag';
+    $('simEnd').disabled=sequenced&&pattern==='sustainedExhaust';
+  }
+  function renderBaselineReview() {
+    if(!reviewedBaseline)return;
+    const row=reviewedBaseline.rooms.find(n=>n.id===roomPicker.value);
+    if(!row)return;
+    const band=row.entered_band;
+    $('simBaselineReview').textContent='Reviewed modeled normal: '+row.pressure_pa.toFixed(3)+' Pa. '+
+      (band?'Entered band '+band.min+' to '+band.max+' Pa: '+row.band_result.replaceAll('_',' ')+'. ':'No numeric design band supplied. ')+
+      'Snapshot '+reviewedBaseline.captured_utc+'. Not measured calibration.';
+  }
+  function selectedBoundary() {
+    return frames.length&&config?reviewBoundary(frames,config,roomPicker.value,$('simBoundaryNegative').value,run.threshold,reviewedBaseline):null;
+  }
+  function renderEventSchedule(plan) {
+    $('simEventSchedule').replaceChildren();
+    for(const event of plan?.events??[]){
+      const item=document.createElement('li'),node=config.nodes.find(n=>n.id===event.node);
+      item.textContent=node.name+' '+event.role+': '+(event.loss*100).toFixed(0)+'% loss at '+event.start+' s; '+
+        (event.restore===null?'not restored within run':'restoration begins '+event.restore+' s')+'.';
+      $('simEventSchedule').append(item);
+    }
+  }
 
   function pause() {
     clearInterval(timer);
@@ -27,6 +72,7 @@ export function workspaceSimulation({getModel, overlay, download}) {
   function clearRun() {
     pause();
     frames = [];
+    testPlan=null;
     run = null;
     comparison = null;
     calibrationEvidence = null;
@@ -35,6 +81,8 @@ export function workspaceSimulation({getModel, overlay, download}) {
     $('simTimeline').disabled = true;
     $('simExport').disabled = true;
     $('simValidationExport').disabled = true;
+    $('simBoundaryExport').disabled=$('simReportExport').disabled=true;
+    $('simEventSchedule').replaceChildren();
     $('simSummary').replaceChildren();
     $('simFlows').replaceChildren();
     $('simFitResult').textContent = '';
@@ -51,6 +99,7 @@ export function workspaceSimulation({getModel, overlay, download}) {
       for (const id of ['simCSV', 'simFitCSV', 'simHoldoutCSV']) $(id).value = '';
     }
     config = getModel() ? buildWorkspaceNetwork(getModel()) : null;
+    designBands={};invalidateBaseline('No reviewed baseline captured for this model.');
     roomPicker.replaceChildren(...(config?.nodes ?? []).map(room => new Option(room.name, room.id)));
     if (config?.nodes.some(room => room.id === previous)) roomPicker.value = previous;
     $('openSimulation').disabled = !config;
@@ -60,11 +109,12 @@ export function workspaceSimulation({getModel, overlay, download}) {
       ? `${config.nodes.length} rooms and ${config.links.length} internal connections ready for input review.`
       : 'Open an IFC with room spaces to run a pressure scenario.';
     $('simExample').disabled = getModel()?.source?.name !== 'Duplex_A_20110907.ifc';
-    clearRun();
+    fillBoundaryChoices();syncTestMode();clearRun();
     fillInputs();
   }
 
   function fillInputs() {
+    fillBoundaryChoices();
     const node = config?.nodes.find(room => room.id === roomPicker.value);
     for (const [id, key, scale] of [['simSupply','supply',3600],['simExhaust','exhaust',3600],['simLeak','leak',1]]) {
       $(id).value = node ? Number((node[key] * scale).toPrecision(9)) : '';
@@ -76,6 +126,9 @@ export function workspaceSimulation({getModel, overlay, download}) {
     $('simReferenceDoors').textContent = config?.referenceDoors
       ? `${config.referenceDoors} reviewed doors have a reference endpoint. Use the aggregate room leakage input for reference flow.`
       : '';
+    const band=designBands[roomPicker.value];
+    $('simBandMin').value=band?.min??'';$('simBandMax').value=band?.max??'';
+    renderBaselineReview();
   }
 
   function setRoom(id) {
@@ -85,73 +138,73 @@ export function workspaceSimulation({getModel, overlay, download}) {
     render();
   }
 
+  function applyVisibleInputs() {
+    const node=config?.nodes.find(n=>n.id===roomPicker.value);
+    if(!node)throw Error('Select a pressure room.');
+    for(const [id,key,scale] of [['simSupply','supply',3600],['simExhaust','exhaust',3600],['simLeak','leak',1]]){
+      if(!$(id).checkValidity())throw Error('Review the visible room flow and leakage inputs.');
+      const value=Number($(id).value)/scale;
+      if(Math.abs(node[key]-value)>Math.max(1e-12,Math.abs(node[key])*1e-8)){
+        node[key]=value;
+        if(key!=='leak')node.flowSource[key]='Scenario edit';
+        invalidateBaseline();
+      }
+    }
+  }
+
   function saveInput(key, id, scale) {
     const node = config?.nodes.find(room => room.id === roomPicker.value);
     if (!node) return;
     const raw = $(id).value;
     const value = Number(raw) / scale;
     if (!raw.trim() || !Number.isFinite(value) || value < 0 || (key === 'leak' && value <= 0)) {
+      invalidateBaseline();clearRun();
       $('simStatus').textContent = 'Enter a valid nonnegative flow and positive leakage.';
       return;
     }
     node[key] = value;
     if (key !== 'leak') node.flowSource[key] = 'Scenario edit';
+    invalidateBaseline();
     clearRun();
     fillInputs();
     $('simStatus').textContent = 'Input updated. Run again to refresh the results.';
   }
 
-  function renderPlot(index) {
-    const canvas = $('simChart');
-    const context = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
+  function renderPlot(index,boundary) {
+    const canvas=$('simChart'),context=canvas.getContext('2d'),width=canvas.width,height=canvas.height;
     context.clearRect(0,0,width,height);
-    if (!frames.length || index < 0) return;
-    const points = observations.filter(row => row.positive === roomPicker.value && row.negative === REFERENCE && row.t <= 60);
-    const values = frames.map(frame => frame.p[index]);
-    if (run?.scenario === 'sensor') values.push(...frames.map(frame => frame.sensor[index]));
-    const low = Math.min(-1, ...values, ...points.map(row => row.value));
-    const high = Math.max(1, ...values, ...points.map(row => row.value));
-    const x = time => 45 + time / 60 * (width - 57);
-    const y = pressure => 12 + (high - pressure) / (high - low) * (height - 37);
-    context.font = '12px system-ui';
-    context.fillStyle = '#53625a';
-    for (let i = 0; i <= 4; i++) {
-      const pressure = low + (high - low) * i / 4;
-      context.strokeStyle = '#d8dfd8';
-      context.beginPath();
-      context.moveTo(x(0), y(pressure));
-      context.lineTo(x(60), y(pressure));
-      context.stroke();
-      context.fillText(pressure.toFixed(1), 2, y(pressure) + 4);
+    if(!frames.length||index<0||!boundary)return;
+    const duration=frames.at(-1).t;
+    const points=observations.filter(row=>row.positive===roomPicker.value&&row.negative===$('simBoundaryNegative').value&&row.t<=duration);
+    const values=boundary.points.map(point=>point.value);
+    if(run?.scenario==='sensor')values.push(...frames.map(frame=>predictBoundary({p:frame.sensor},config,boundary.positive,boundary.negative)));
+    const low=Math.min(-1,boundary.baseline_pa,...values,...points.map(row=>row.value));
+    const high=Math.max(1,boundary.threshold_pa,boundary.baseline_pa,...values,...points.map(row=>row.value));
+    const x=time=>45+time/(duration||1)*(width-57),y=pressure=>12+(high-pressure)/(high-low)*(height-37);
+    context.font='12px system-ui';context.fillStyle='#53625a';
+    for(let i=0;i<=4;i++){
+      const pressure=low+(high-low)*i/4;
+      context.strokeStyle='#d8dfd8';context.beginPath();context.moveTo(x(0),y(pressure));context.lineTo(x(duration),y(pressure));context.stroke();
+      context.fillText(pressure.toFixed(1),2,y(pressure)+4);
+      const t=duration*i/4;context.fillText(t.toFixed(0)+'s',x(t)-9,height-7);
     }
-    for (let t = 0; t <= 60; t += 15) context.fillText(t + 's', x(t) - 9, height - 7);
-    function trace(key, color) {
-      context.strokeStyle = color;
-      context.lineWidth = 2;
-      context.beginPath();
-      frames.forEach((frame, i) => {
-        if (i === 0) context.moveTo(x(frame.t), y(frame[key][index]));
-        else context.lineTo(x(frame.t), y(frame[key][index]));
-      });
-      context.stroke();
+    for(const [pressure,color] of [[boundary.baseline_pa,'#7b8a89'],[boundary.threshold_pa,'#b15236']]){
+      context.setLineDash([4,3]);context.strokeStyle=color;context.beginPath();context.moveTo(x(0),y(pressure));context.lineTo(x(duration),y(pressure));context.stroke();context.setLineDash([]);
     }
-    trace('p', '#176655');
-    if (run?.scenario === 'sensor') trace('sensor', '#7553a1');
-    context.fillStyle = '#a65a10';
-    for (const point of points) {
-      context.beginPath();
-      context.arc(x(point.t), y(point.value), 3, 0, Math.PI * 2);
-      context.fill();
+    function trace(values,color){
+      context.strokeStyle=color;context.lineWidth=2;context.beginPath();
+      values.forEach((value,i)=>{if(i===0)context.moveTo(x(frames[i].t),y(value));else context.lineTo(x(frames[i].t),y(value));});context.stroke();
     }
-    context.strokeStyle = '#53625a';
-    context.lineWidth = 1;
-    const time = frames[Number($('simTimeline').value)].t;
-    context.beginPath();
-    context.moveTo(x(time), 10);
-    context.lineTo(x(time), height - 24);
-    context.stroke();
+    trace(boundary.points.map(p=>p.value),'#176655');
+    if(run?.scenario==='sensor')trace(frames.map(frame=>predictBoundary({p:frame.sensor},config,boundary.positive,boundary.negative)),'#7553a1');
+    context.fillStyle='#a65a10';
+    for(const point of points){context.beginPath();context.arc(x(point.t),y(point.value),3,0,Math.PI*2);context.fill();}
+    const markers=testPlan?.events.flatMap(e=>[e.start,e.restore].filter(t=>t!==null))??[run.start,run.end];
+    context.strokeStyle='#bfafa1';context.setLineDash([2,4]);
+    for(const time of markers){if(time<0||time>duration)continue;context.beginPath();context.moveTo(x(time),10);context.lineTo(x(time),height-24);context.stroke();}
+    context.setLineDash([]);context.strokeStyle='#53625a';context.lineWidth=1;
+    const time=frames[Number($('simTimeline').value)].t;
+    context.beginPath();context.moveTo(x(time),10);context.lineTo(x(time),height-24);context.stroke();
   }
 
   function render() {
@@ -209,7 +262,13 @@ export function workspaceSimulation({getModel, overlay, download}) {
         ? `MAE ${comparison.mae.toFixed(3)} Pa · RMSE ${comparison.rmse.toFixed(3)} Pa · ${comparison.count} matched · ${comparison.unmatched.length} unmatched.`
         : 'No readings align with the simulated time range.'
       : recording ? 'Run a scenario to compare the recording.' : 'Load a recording to compare simulated and observed pressure.';
-    renderPlot(index);
+    const boundary=selectedBoundary();
+    $('simBoundaryNow').textContent=boundary&&frame?format(predictBoundary(frame,config,boundary.positive,boundary.negative)):'—';
+    $('simBoundaryNormal').textContent=format(boundary?.baseline_pa);
+    $('simBoundaryPeak').textContent=format(boundary?.peak_pa);
+    $('simBoundaryTime').textContent=boundary?boundary.above_threshold_s.toFixed(2)+' s':'—';
+    $('simBoundaryBasis').textContent=boundary?'Chart: '+(config.nodes.find(n=>n.id===boundary.positive)?.name??boundary.positive)+' minus '+(config.nodes.find(n=>n.id===boundary.negative)?.name??'fixed reference')+'. '+boundary.connection.replaceAll('_',' ')+'. Cells retain room-to-fixed-reference pressure.':'The chart follows this pressure pair. 3D cells retain room-to-fixed-reference pressure.';
+    renderBaselineReview();renderPlot(index,boundary);
   }
 
   function compare() {
@@ -243,40 +302,62 @@ export function workspaceSimulation({getModel, overlay, download}) {
   roomPicker.onchange = () => { fillInputs(); render(); };
   for (const [id, key, scale] of [['simSupply','supply',3600],['simExhaust','exhaust',3600],['simLeak','leak',1]]) {
     $(id).onchange = () => saveInput(key,id,scale);
+    $(id).oninput = () => {invalidateBaseline('Flow input edited. Capture normal modeled operation again.');clearRun();};
   }
-  for (const id of ['simScenario','simSeverity','simStart','simEnd','simThreshold','simConfirm']) {
-    $(id).onchange = () => {
+  for (const id of ['simScenario','simSeverity','simStart','simEnd','simThreshold','simConfirm','simHorizon','simRamp','simTestPattern','simSecondRoom','simSupplyDelay','simRestoreDelay']) {
+    const invalidateScenario = () => {
+      if(id==='simScenario'&&$('simScenario').value==='sequenced'){if(Number($('simHorizon').value)===60)$('simHorizon').value=180;if(Number($('simThreshold').value)===.2)$('simThreshold').value=2.5;}
+      syncTestMode();
       if (frames.length) {
         clearRun();
         $('simStatus').textContent = 'Scenario controls changed. Run again.';
       }
     };
+    $(id).onchange=invalidateScenario;
+    if($(id).tagName==='INPUT')$(id).oninput=invalidateScenario;
   }
-  $('simRun').onclick = () => {
-    try {
-      if (!$('simConfirm').checked) throw Error('Review the network inputs and confirm they are suitable for this demo.');
-      if (['simSupply','simExhaust','simLeak','simSeverity','simStart','simEnd','simThreshold'].some(id => !$(id).checkValidity())) {
-        throw Error('Check the required inputs and their allowed ranges.');
-      }
-      const scenario = $('simScenario').value;
-      const target = config.nodes.findIndex(node => node.id === roomPicker.value);
-      const severity = Number($('simSeverity').value) / 100;
-      const options = {start:Number($('simStart').value),end:Number($('simEnd').value),threshold:Number($('simThreshold').value)};
-      const nextFrames = runNetwork({...config, approved:true}, scenario, target, severity, options);
-      clearRun();
-      frames = nextFrames;
-      run = {scenario,target,severity,...options};
-      $('simTimeline').max = frames.length - 1;
-      for (const id of ['simTimeline','simPlay','simExport','simValidationExport']) $(id).disabled = false;
-      $('simStatus').textContent = `${SCENARIOS[scenario]} · target ${config.nodes[target].name} · ${frames.length} simulated samples.`;
-      for (const row of summarize(frames,config,run.threshold)) {
-        const item = document.createElement('li');
-        item.textContent = `${row.name} · max change ${row.maxChange.toFixed(2)} Pa · above threshold ${row.duration.toFixed(1)} s`;
+  $('simCaptureBaseline').onclick=()=>{
+    try{
+      if(!$('simConfirm').checked)throw Error('Review the network inputs and check the review box before capturing a baseline.');
+      applyVisibleInputs();
+      const min=$('simBandMin').value.trim(),max=$('simBandMax').value.trim(),id=roomPicker.value;
+      if(Boolean(min)!==Boolean(max))throw Error('Enter both design-band bounds, or leave both empty.');
+      if(min)designBands[id]={min:Number(min),max:Number(max)};else delete designBands[id];
+      reviewedBaseline=captureBaseline({...config,approved:true},{designIntent:$('simDesignIntent').value,reviewer:$('simReviewer').value,bands:designBands});
+      renderBaselineReview();
+      $('simStatus').textContent='Normal modeled operation captured. Select the failure sequence and run the test.';
+    }catch(error){invalidateBaseline(error.message);}
+  };
+  $('simRun').onclick=()=>{
+    try{
+      if(!$('simConfirm').checked)throw Error('Review the network inputs and confirm they are suitable for this demo.');
+      const ids=['simSupply','simExhaust','simLeak','simSeverity','simStart','simThreshold','simHorizon','simRamp'];
+      if(!$('simEnd').disabled)ids.push('simEnd');
+      if(ids.some(id=>!$(id).checkValidity()))throw Error('Check required inputs and their allowed ranges.');
+      applyVisibleInputs();
+      const scenario=$('simScenario').value,target=config.nodes.findIndex(n=>n.id===roomPicker.value),severity=Number($('simSeverity').value)/100;
+      const options={start:Number($('simStart').value),end:Number($('simEnd').value),threshold:Number($('simThreshold').value),duration:Number($('simHorizon').value),tau:Number($('simRamp').value)};
+      let nextPlan=null,nextFrames;
+      if(scenario==='sequenced'){
+        if(!baselineMatches(reviewedBaseline,config))throw Error('Capture a reviewed baseline for the current inputs before running a sequence.');
+        nextPlan=makeTestPlan({...config,approved:true},{pattern:$('simTestPattern').value,target,
+          secondTarget:config.nodes.findIndex(n=>n.id===$('simSecondRoom').value),start:options.start,restore:options.end,severity,
+          delay:Number($('simSupplyDelay').value),restoreDelay:Number($('simRestoreDelay').value),duration:options.duration,tau:options.tau});
+        nextFrames=runScheduledNetwork({...config,approved:true},nextPlan);
+      }else nextFrames=runNetwork({...config,approved:true},scenario,target,severity,options);
+      clearRun();frames=nextFrames;testPlan=nextPlan;run={scenario,target,severity,...options};
+      $('simTimeline').max=frames.length-1;
+      for(const id of ['simTimeline','simPlay','simExport','simValidationExport','simBoundaryExport','simReportExport'])$(id).disabled=false;
+      $('simStatus').textContent=(nextPlan?.title??SCENARIOS[scenario])+' · target '+config.nodes[target].name+' · '+frames.at(-1).t+' s · SYNTHETIC model output.';
+      for(const row of summarize(frames,config,run.threshold)){
+        const item=document.createElement('li');
+        item.textContent=row.name+' · max change '+row.maxChange.toFixed(2)+' Pa · above threshold '+row.duration.toFixed(1)+' s';
         $('simSummary').append(item);
       }
-      compare();
-    } catch (error) { $('simStatus').textContent = error.message; }
+      renderEventSchedule(testPlan);compare();
+    }catch(error){$('simStatus').textContent=error.message;}
   };
+
   $('simTimeline').oninput = render;
   $('simVoxels').onchange = render;
   $('simContext').onchange = render;
@@ -330,7 +411,7 @@ export function workspaceSimulation({getModel, overlay, download}) {
   };
   $('simValidationExport').onclick = () => {
     download('Sure2_Run_Evidence.json', JSON.stringify({
-      source:getModel().source, run, config, recording, comparison, calibrationEvidence,
+      source:getModel().source, dataSource:'SYNTHETIC', modelOutputSource:'SYNTHETIC', recordingSource:recording==='Synthetic example'?'SYNTHETIC':recording?'IMPORTED_UNVERIFIED':null, reviewedBaseline, testPlan, boundaryReview:selectedBoundary(), run, config, recording, comparison, calibrationEvidence,
       roomSummary:summarize(frames,config,run.threshold)
     },null,2));
   };
@@ -356,5 +437,19 @@ export function workspaceSimulation({getModel, overlay, download}) {
       if (generation === loadGeneration) $('simFitResult').textContent = error.message;
     }
   };
+
+  $('simBoundaryNegative').onchange=render;
+  for(const id of ['simDesignIntent','simReviewer','simBandMin','simBandMax'])$(id).oninput=()=>{
+    invalidateBaseline();clearRun();
+  };
+  $('simBoundaryExport').onclick=()=>{
+    const review=selectedBoundary();
+    if(review)download('Sure2_Boundary_SYNTHETIC.csv',boundaryCSV(review),'text/csv');
+  };
+  $('simReportExport').onclick=()=>{
+    const review=selectedBoundary();
+    if(review)download('Sure2_Simulated_HVAC_Test.html',scenarioReportHTML({baseline:reviewedBaseline,plan:testPlan,review,modelName:getModel().source.name,run,comparison}),'text/html');
+  };
+
   return {loadModel,setRoom};
 }

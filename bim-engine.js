@@ -42,12 +42,14 @@ export const SCENARIOS={normal:'Normal operation',exhaust:'Exhaust degradation',
 export function runNetwork(c,scenario='normal',target=0,severity=.7,options={}){
  checkConfig(c);if(!Object.hasOwn(SCENARIOS,scenario))throw Error('Unknown scenario.');
  if(!Number.isInteger(target)||target<0||target>=c.nodes.length||!Number.isFinite(severity)||severity<0||severity>1)throw Error('Invalid target or severity.');
- const start=options.start??10,end=options.end??60;
- if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||start>=end||end>60)throw Error('Event times must satisfy 0 ≤ start < recovery ≤ 60 seconds.');
+ const duration=options.duration??60,tau=options.tau??4;
+ if(!Number.isFinite(duration)||duration<=0||duration>600||!Number.isFinite(tau)||tau<=0||tau>60)throw Error('Use a duration of 0–600 seconds and an input ramp greater than 0 and at most 60 seconds.');
+ const start=options.start??10,end=options.end??Math.min(60,duration);
+ if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||start>=end||end>duration)throw Error('Event times must satisfy 0 ≤ start < recovery ≤ run duration.');
  const door=c.links.findIndex(l=>l.enabled&&(l.a===c.nodes[target].id||l.b===c.nodes[target].id));
  if(scenario==='door'&&door<0)throw Error('This room has no enabled door connection. Review/add a connection or select another room.');
- const frames=[];for(let t=0;t<=60;t+=.5){
-  const factor=t<start?0:t<end?1-Math.exp(-(t-start)/4):(1-Math.exp(-(end-start)/4))*Math.exp(-(t-end)/4);
+ const frames=[];const count=Math.ceil(duration/.5);for(let sample=0;sample<=count;sample++){const t=Math.min(duration,sample*.5);
+  const factor=t<start?0:t<end?1-Math.exp(-(t-start)/tau):(1-Math.exp(-(end-start)/tau))*Math.exp(-(t-end)/tau);
   const local={...c,nodes:c.nodes.map(n=>({...n})),links:c.links.map(l=>({...l}))},s=c.nodes.map(n=>n.supply),e=c.nodes.map(n=>n.exhaust);
   if(scenario==='exhaust')e[target]*=1-factor*severity;
   if(scenario==='supply')s[target]*=1+factor*severity;

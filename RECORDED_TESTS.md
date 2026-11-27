@@ -70,11 +70,11 @@ Failure/restoration are operator-entered event markers. Metrics cover the full r
 The graph shows boundary differential pressure. It does not turn a room-to-room differential into an absolute room pressure, or create a spatial airflow field.
 
 ## BIM comparison
-The existing solver and its 0–60 second horizon remain unchanged. Full recording playback is provided by the new analysis workspace.
+R1 originally used the existing 0–60 second simulator. The November 27 HVAC update extends the main simulator to 600 seconds and adds selected boundary charting; see HVAC_TESTS.md. The recorded-analysis R1 export remains an explicit window of at most 60 seconds. Full recording playback remains available in the analysis workspace.
 
 The BIM CSV contains valid samples in the selected window, with window-start subtracted from their times. JSON evidence and readable report record the original elapsed window and time origin. Map the endpoints to actual model IDs and align scenario events to that window. Do not compress minutes into seconds. Repeatability or physical accuracy is not inferred from successful import.
 
-The older simulator currently displays imported room-to-reference points on its chart; explicit boundary comparisons are calculated numerically. The new workspace displays any selected imported pressure boundary independently.
+The main simulator now charts imported points matching the selected pressure pair within the simulated duration. The recorded-analysis workspace displays any selected imported pressure boundary independently. Map endpoints consistently and keep the chosen time origin explicit.
 
 ## Exports and provenance
 Readable HTML: self-contained chart, metrics, settings, quality notes, manual reviewer assessment and source fingerprint. Use the browser print flow to save a PDF.
@@ -90,7 +90,7 @@ Initial and residual risk are manual reviewer fields, not automatic results. A r
 ## Verification
 Run npm test with Node 18 or later. No npm installation is needed.
 
-22 automated tests cover numeric crossing/recovery calculations, flagged gaps, unit conversion, polarity, time resets, malformed rows, schema/mapping, boundary CSV roundtrip, provenance, HTML escaping, large files and the prior A101 model values.
+The original 22 recorded-analysis tests cover numeric crossing/recovery calculations, flagged gaps, unit conversion, polarity, time resets, malformed rows, schema/mapping, boundary CSV roundtrip, provenance, HTML escaping, large files and the prior A101 model values. The integrated suite now also includes 14 HVAC tests (36 total).
 
 Browser workflow checks are recorded in RECORDED_TEST_VERIFICATION.md. This release does not claim hardware-in-the-loop or WBHT raw-data validation.
 
