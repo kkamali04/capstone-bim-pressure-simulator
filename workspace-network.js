@@ -1,3 +1,4 @@
+import {chamberNetworkValues,CHAMBER_ID} from './chamber.js';
 import {setup} from './bim-engine.js';
 import {roomId, specFor} from './engineering.js';
 
@@ -48,7 +49,13 @@ export function buildWorkspaceNetwork(model) {
       }
     }
   }
+  if(model.chamberSetup){
+    if(config.nodes.length!==1||config.nodes[0].id!==CHAMBER_ID)throw Error('Chamber setup must contain exactly the CHAMBER pressure zone.');
+    Object.assign(config.nodes[0],chamberNetworkValues(model.chamberSetup));
+    config.nodes[0].flowSource={supply:'Entered chamber assumption',exhaust:'Entered chamber assumption'};
+    config.basis='Schematic chamber; geometry evidence and assumed flows are stored in the project.';
+  }
   config.referenceDoors = referenceDoors;
-  config.basis = 'Room volumes and door endpoints from the project. Flow entries and demo assumptions are shown separately.';
+  if(!model.chamberSetup)config.basis = 'Room volumes and door endpoints from the project. Flow entries and demo assumptions are shown separately.';
   return config;
 }

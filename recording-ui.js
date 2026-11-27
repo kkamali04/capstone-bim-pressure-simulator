@@ -1,6 +1,7 @@
+import {setupSerialCapture} from './serial-ui.js';
 import {VERSION,parseRecording,prepareChannel,analyzeChannel,buildEvidence,chartSVG,exportBoundaryCSV,reportHTML,escapeHTML} from './recording-analysis.js';
 const $=id=>document.getElementById(id);
-let parsed=null,channel=null,result=null,evidence=null,inputText='',filename='',fingerprint=null,loadGeneration=0,timer=null;
+let parsed=null,channel=null,result=null,evidence=null,inputText='',filename='',fingerprint=null,captureContext=null,loadGeneration=0,timer=null;
 const exports=['exportReport','printReport','exportJSON','exportCSV'];
 function status(id,text,error=false){$(id).textContent=text;$(id).classList.toggle('error',error);}
 function pause(){if(timer)clearInterval(timer);timer=null;$('play').textContent='Play';}
@@ -27,9 +28,9 @@ function configureChannel(){
   $('bimStart').value=first;$('bimEnd').value=Math.min(last,first+60);
   $('failure').value='';$('restore').value='';$('sign').value='1';
 }
-async function install(text,name,synthetic=false,originalHash=null){
+async function install(text,name,synthetic=false,originalHash=null,captureBundle=null){
   const generation=++loadGeneration;
-  inputText=text;filename=name;fingerprint=originalHash;
+  inputText=text;filename=name;fingerprint=originalHash;captureContext=captureBundle;
   invalidate('Importing recording…');parsed=null;$('analysisFields').disabled=true;$('channel').replaceChildren();
   $('provenance').textContent='NO ANALYSIS';$('provenance').className='badge';
   $('boundaryLabel').textContent='No recording analyzed.';
@@ -40,7 +41,7 @@ async function install(text,name,synthetic=false,originalHash=null){
     parsed=next;inputText=text;filename=name;fingerprint=hash;
     $('source').value=(synthetic||parsed.declaredSynthetic)?'SYNTHETIC':'IMPORTED_UNVERIFIED';
     $('source').disabled=synthetic||parsed.declaredSynthetic;
-    $('runId').value=synthetic?'SYNTHETIC_'+name.replace(/[^a-z0-9_-]/gi,'_').replace(/_csv$/,''):name.replace(/\.[^.]+$/,'').slice(0,120);
+    $('runId').value=captureBundle?.run_id??(synthetic?'SYNTHETIC_'+name.replace(/[^a-z0-9_-]/gi,'_').replace(/_csv$/,''):name.replace(/\.[^.]+$/,'').slice(0,120));
     for(const c of parsed.channels){
       const option=new Option(c.label+' · '+c.validCount+' valid / '+c.samples.length+' rows',c.id);
       $('channel').add(option);
@@ -48,6 +49,12 @@ async function install(text,name,synthetic=false,originalHash=null){
     const firstValid=parsed.channels.find(c=>c.validCount>=2);
     if(firstValid)$('channel').value=firstValid.id;
     configureChannel();
+    if(captureBundle){
+      for(const [kind,id] of [['failure','failure'],['restore','restore']]){
+        const marked=captureBundle.events.filter(e=>e.kind===kind);
+        if(marked.length===1)$(id).value=marked[0].elapsed_s;
+      }
+    }
     $('analysisFields').disabled=false;
     status('importStatus',name+' · '+parsed.format+' · '+parsed.inputUnit+' → Pa · '+parsed.channels.length+' channel(s). Original values are retained in the input file.');
     invalidate('Recording loaded. Review the mapping, baseline and event settings, then analyze.');
@@ -77,7 +84,7 @@ $('recordingFile').onchange=async event=>{
   await install(text,file.name,false,hash);event.target.value='';
 };
 $('inputUnit').onchange=()=>{
-  if(inputText)install(inputText,filename,false,fingerprint);
+  if(inputText)install(inputText,filename,false,fingerprint,captureContext);
 };
 $('example').onchange=async event=>{
   const name=event.target.value;if(!name)return;
@@ -109,6 +116,10 @@ function runAnalysis(){
       positive:$('positive').value.trim(),negative:$('negative').value.trim(),sign:number('sign'),
       bimWindow:{start_s:number('bimStart'),end_s:number('bimEnd')},
       review:{reviewer:$('reviewer').value.trim(),context:$('context').value.trim(),initialRisk:$('initialRisk').value,residualRisk:$('residualRisk').value,notes:$('reviewNotes').value.trim()}});
+    if(captureContext){
+      const {raw_serial_text,normalized_csv,...metadata}=captureContext;
+      nextEvidence.capture_session=metadata;
+    }
     result=next;evidence=nextEvidence;
     renderResults();
     exports.forEach(id=>$(id).disabled=false);
@@ -174,3 +185,5 @@ $('printReport').onclick=()=>{
 };
 window.addEventListener('pagehide',pause);
 
+
+setupSerialCapture({install,download,sha256});

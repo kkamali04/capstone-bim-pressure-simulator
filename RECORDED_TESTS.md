@@ -18,7 +18,7 @@ Synthetic data only verify software behavior. They do not establish physical acc
 The importer matches the current Sure2_Sensor_Display.ino CSV header:
 time_ms,dp_a_pa,dp_b_pa,sht_temp_c,sht_rh_pct,bmp_abs_pa,bmp_temp_c,dp_a_ok,dp_b_ok,sht_ok,bmp_ok
 
-The firmware is unchanged. Open serial at 115200 baud and send c. Save the CSV output to a UTF-8 .csv or .txt file. Startup comments before the CSV header are accepted and preserved as notes. Capture must preserve columns; avoid adding a terminal's display timestamps or truncating rows. The browser does not open the serial port or record the device live.
+The firmware is unchanged. Open serial at 115200 baud and send c. Save the CSV output to a UTF-8 .csv or .txt file. Startup comments before the CSV header are accepted and preserved as notes. Capture must preserve columns; avoid adding a terminal's display timestamps or truncating rows. R1 used saved captures only. The R3 update adds optional browser USB capture; see CHAMBER_CAPTURE.md. Physical board verification remains pending.
 
 DP A and B mean separate pressure devices, not the two pneumatic ports of one sensor. Select the installed channel. The *_ok flags determine validity: a failed value remains missing, never zero. A valid numeric zero remains zero. Blank/nonfinite pressure with a nominally valid flag is still excluded and counted.
 

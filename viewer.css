@@ -39,3 +39,5 @@
 #pressureCellsNote{color:#465753;margin-top:3px}
 
 #simulationPanel textarea,#simulationPanel input:not([type=checkbox]):not([type=file]):not([type=number]){width:100%;display:block;margin-top:5px;padding:8px;border:1px solid #cbd2ca;border-radius:4px;font:inherit;color:#29342d}#simulationPanel .simDetails[hidden],#simulationPanel label[hidden],#simDelayFields[hidden]{display:none}#simBaselineReview{padding:9px;border-radius:5px;background:#edf4f3;color:#315758}#simEventSchedule{font-size:13px}#simChart{height:140px}.simMetrics dt{font-size:12px}.simLegend{font-size:12px}
+
+.chamberDialog{width:min(620px,94vw);max-height:90vh;overflow:auto;border:1px solid #a9c3bb;border-radius:12px;padding:24px;color:#234039;background:#fff}.chamberDialog::backdrop{background:#142d2866}.chamberDialog label{display:block;font-size:13px;margin:12px 0}.chamberDialog input,.chamberDialog select,.chamberDialog textarea{display:block;width:100%;margin-top:5px}.simTriple{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
