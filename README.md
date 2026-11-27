@@ -34,3 +34,9 @@ Third-party libraries retain their included license files under vendor/. The [Ro
 Open [Recorded Test Analysis](https://kkamali04.github.io/capstone-bim-pressure-simulator/recordings.html) from the building workspace. It reads the existing Arduino CSV, analyzes recorded pressure independently of the solver, plays the full recording and exports a printable HTML report, JSON evidence and a declared 60-second BIM comparison window. All processing stays in the browser tab; no recordings are uploaded.
 
 Start with a labeled synthetic example, then review the channel, pressure endpoints, provenance, baseline, events, threshold and recovery criterion. Follow [the recorded-test guide](RECORDED_TESTS.md) for data formats, methods, limitations and verification. Original firmware is unchanged. Run checks with `npm test` (Node 18+).
+
+## Chamber setup and USB capture (November 27, 2026)
+
+Use **Chamber setup** to build and save an editable one-zone shell matching the proposed box, with explicit dimension evidence and assumed pressure-network inputs. **Recorded tests** now includes Web Serial capture, recent DP A/B preview, run notes and event markers, plus raw text / CSV / JSON downloads and transfer into the existing analysis workflow. Use synthetic serial replay to demonstrate the software without a board.
+
+Follow [the chamber and capture guide](CHAMBER_CAPTURE.md). The integrated suite has 55 passing checks. Physical USB acquisition, actual chamber dimensions and calibrated prediction accuracy still require lab verification.

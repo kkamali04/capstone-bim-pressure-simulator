@@ -10,10 +10,17 @@
 <main>
 <section class="intro"><div><p class="eyebrow">MEASUREMENT WORKSPACE</p><h1>Recorded Test Analysis</h1><p>Inspect a pressure recording, mark the test events and keep an auditable summary.</p></div><span class="privacy">Files are processed in this tab.</span></section>
 <div class="workspace">
-<aside class="controls">
+<aside class="controls"><section class="card"><h2>USB sensor capture</h2>
+<p id="captureSupport" class="help">Use the working sketch over USB at 115200 baud. Close Arduino Serial Monitor first. Start sends <code>t</code> then <code>c</code> to request a fresh CSV header; it does not flash firmware.</p>
+<label>Capture run ID<input id="captureRunId" maxlength="120" value="CHAMBER_RUN_01" required></label>
+<label>Setup notes<textarea id="captureNotes" maxlength="2000" rows="2" placeholder="Sensors connected, dimensions/photo reference, hose polarity, fan/opening condition"></textarea></label>
+<div class="exports"><button id="serialConnect">Connect USB</button><button id="serialStart" disabled>Start new run</button><button id="serialStop" disabled>Stop &amp; disconnect</button><button id="serialReplay">Replay synthetic stream</button></div>
+<p class="help">Starting a run replaces the previous in-tab capture. Save each run before starting another. No device data is sent to a server. Do not close this tab before downloading.</p>
+<div id="captureStatus" class="notice" role="status">Connect a device or replay a synthetic serial stream.</div>
+</section>
 <section class="card"><h2>Recording</h2>
 <label>Sensor CSV or serial capture<input id="recordingFile" type="file" accept=".csv,.txt,text/csv,text/plain"></label>
-<p class="help">Use the working sketch at 115200 baud; send <code>c</code> for CSV. Saving a recording still requires serial capture on your computer.</p>
+<p class="help">Use the working sketch at 115200 baud; send <code>c</code> for CSV. Capture over USB above or upload a saved recording.</p>
 <label>Units for a generic <code>pressure</code> column<select id="inputUnit"><option value="">Choose verified units</option><option value="Pa">Pa</option><option value="inH2O">inH₂O (conventional)</option><option value="kPa">kPa</option></select></label>
 <p class="help">Headers ending in <code>_pa</code> already declare Pa. Resolve conflicting source labels before import.</p>
 <label>Synthetic software check<select id="example"><option value="">Choose a test recording</option><option value="brief">Brief reversal and recovery · 180 s</option><option value="sustained">Sustained reversal · 240 s</option><option value="gaps">Invalid samples and gaps · 180 s</option></select></label>
@@ -36,7 +43,7 @@
 <div class="two"><label>Recovery band ± (Pa)<input id="recoveryBand" type="number" min="0" step="any" value="0.5" required></label><label>Recovery hold (s)<input id="recoveryHold" type="number" min="0.001" step="any" value="5" required></label></div>
 <label>Maximum connected gap (s), optional<input id="maxGap" type="number" min="0.000001" step="any" placeholder="Auto: 1.5 × median sample interval"></label>
 <div class="two"><label>BIM export start (s)<input id="bimStart" type="number" min="0" step="any" required></label><label>BIM export end (s)<input id="bimEnd" type="number" min="0" step="any" required></label></div>
-<p class="help">The existing simulator compares up to 60 s. Export a declared window of at most 60 s, rebased to zero. Full-recording analysis and JSON remain intact; align the model events to this window.</p>
+<p class="help">The main twin supports up to 600 s; this analysis export uses a declared window of at most 60 s, rebased to zero. Full-recording analysis and JSON remain intact; align the model events to this window.</p>
 <details class="review"><summary>Reviewer context and assessment</summary>
 <label>Reviewer<input id="reviewer" maxlength="200"></label>
 <label>Boundary and normal design intent<textarea id="context" maxlength="2000" rows="2"></textarea></label>
@@ -48,7 +55,15 @@
 </fieldset>
 </form>
 </aside>
-<div class="results">
+<div class="results"><section class="card"><div class="card-heading"><h2>Capture monitor</h2><strong id="captureSource" class="badge">NO CAPTURE</strong></div>
+<p id="captureCount" class="help">0 rows</p><p id="captureReading" class="reading">DP A: — · DP B: —</p>
+<label>Preview channel<select id="captureChannel"><option value="a">DP A</option><option value="b">DP B</option></select></label>
+<div id="captureTrace" class="chart">Recent serial pressure samples appear here.</div>
+<p class="help">Preview shows up to 200 recent rows. All complete captured rows remain in the downloads. Failed sensor flags remain missing. USB acquisition is unverified until tested with your board.</p>
+<label>Event note<input id="captureEventNote" maxlength="1000" placeholder="What physically changed?"></label>
+<div class="exports"><button id="captureBaseline" disabled>Mark baseline</button><button id="captureFailure" disabled>Mark event / failure</button><button id="captureRestore" disabled>Mark restoration</button><button id="captureMark" disabled>Add note</button></div>
+<p class="help">Markers record host button time and the latest received device-sample time. These clocks are not synchronized; confirm physical event timing before comparison.</p><ul id="captureEvents"></ul>
+<div class="exports"><button id="captureRaw" disabled>Download raw serial text</button><button id="captureCSV" disabled>Download sensor CSV</button><button id="captureBundle" disabled>Download capture + event JSON</button><button id="captureAnalyze" disabled>Load capture into analysis</button></div></section>
 <section class="card chart-card"><div class="card-heading"><div><h2>Pressure recording</h2><p id="boundaryLabel" class="help">No recording analyzed.</p></div><strong id="provenance" class="badge">NO DATA</strong></div>
 <div id="chart" class="chart"><div class="empty"><strong>Your full recording belongs here.</strong><p>Upload sensor data or choose a labeled synthetic check.</p></div></div>
 <p class="legend">Blue: recorded pressure · green band: recovery band · dashed red: analysis threshold · crosses and breaks: invalid or unobserved data</p>

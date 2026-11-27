@@ -1,3 +1,4 @@
+import {buildChamber} from './chamber.js';
 import {workspaceSimulation} from './workspace-simulation.js';
 import {pressureRoomView,pressureColor} from './pressure-view.js';
 import {validateEngineering,roomId,projectPackage} from './engineering.js';
@@ -107,3 +108,28 @@ async function openFile(file){if(!file)return;stop();const serial=importSerial;t
 for(const id of ['openFile','emptyFile'])$('#'+id).onchange=e=>{openFile(e.target.files[0]);e.target.value='';};document.addEventListener('dragover',e=>e.preventDefault());document.addEventListener('drop',e=>{e.preventDefault();openFile(e.dataTransfer.files[0]);});
 fetch('./downloads/sample-manifest.json').then(r=>r.json()).then(m=>{for(const s of m.samples??m){if(s.file?.endsWith('.ifc')&&!s.expected_error)$('#sample').add(new Option(s.name||s.file,s.file));}}).catch(()=>{$('#sample').add(new Option('Public Duplex building','../../models/duplex-source.ifc'));});
 $('#sample').onchange=async e=>{const name=e.target.value;if(!name)return;try{const r=await fetch('./downloads/samples/'+name);if(!r.ok)throw Error('Sample download failed. Use the sample ZIP or upload a file.');await openFile(new File([await r.blob()],name.split('/').at(-1)));}catch(err){status(err.message,true);}e.target.value='';};
+
+$('#openChamber').onclick=()=>{
+ const s=model?.chamberSetup;
+ if(s){
+  $('#chamberUnits').value='m';
+  for(const [id,key] of [['chamberWidth','width_m'],['chamberDepth','depth_m'],['chamberHeight','height_m'],['chamberSupply','supply_m3h'],['chamberExhaust','exhaust_m3h'],['chamberLeak','leak_m3s_sqrtPa']])$('#'+id).value=s[key];
+  $('#chamberBasis').value=s.dimension_basis;$('#chamberNotes').value=s.notes;
+ }
+ $('#chamberStatus').textContent='';$('#chamberDialog').showModal();
+};
+$('#chamberClose').onclick=()=>$('#chamberDialog').close();
+$('#chamberUnits').onchange=()=>{
+ const scale=$('#chamberUnits').value==='m'?.3048:1/.3048;
+ for(const id of ['chamberWidth','chamberDepth','chamberHeight'])$('#'+id).value=Number((Number($('#'+id).value)*scale).toPrecision(10));
+};
+$('#chamberForm').onsubmit=e=>{
+ e.preventDefault();
+ try{
+  const m=buildChamber({units:$('#chamberUnits').value,width:$('#chamberWidth').value,depth:$('#chamberDepth').value,height:$('#chamberHeight').value,
+   supply:$('#chamberSupply').value,exhaust:$('#chamberExhaust').value,leak:$('#chamberLeak').value,dimensionBasis:$('#chamberBasis').value,notes:$('#chamberNotes').value});
+  stop();install(m);$('#chamberDialog').close();
+  if($('#simulationPanel').hidden)$('#openSimulation').click();
+  status('Schematic CHAMBER model created · '+m.entities[0].volume_m3.toFixed(4)+' m³ · '+m.source.note+' Download a reviewed project to save it.');
+ }catch(error){$('#chamberStatus').textContent=error.message;}
+};
